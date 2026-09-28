@@ -2,7 +2,7 @@
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
   "productName": "Trip Tools",
   "version": "0.1.1",
-  "identifier": "com.allenchow.triptools",
+  "identifier": "com.danielchow.triptools",
   "build": {
     "frontendDist": "../dist",
     "devUrl": "http://localhost:5173",
@@ -28,6 +28,7 @@
   },
   "bundle": {
     "active": true,
+    "publisher": "Daniel Chow",
     "targets": ["nsis"],
     "shortDescription": "Private trip planning and expense tools.",
     "icon": [
