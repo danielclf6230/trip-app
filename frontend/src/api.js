@@ -1,4 +1,8 @@
-const base = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+const defaultBase = import.meta.env.PROD
+  ? "https://tools-backend-v3um.onrender.com"
+  : "http://localhost:3000";
+
+const base = (import.meta.env.VITE_API_BASE_URL || defaultBase).replace(/\/$/, "");
 
 function getToken() {
   try { return JSON.parse(localStorage.getItem("user"))?.token ?? null; }

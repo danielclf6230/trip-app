@@ -23,6 +23,7 @@ app.use(express.json({ limit: "2mb" }));
 const allowedOrigins = [
   process.env.FRONTEND_ORIGIN,
   "http://localhost:5173",
+  "http://tauri.localhost",
   "https://trip-pepfij0v3-danielclf6230s-projects.vercel.app",
   "https://trip-app-tool.vercel.app",
 ].filter(Boolean);
