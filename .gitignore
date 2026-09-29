@@ -17,6 +17,7 @@ Thumbs.db
 
 # build output (if any)
 dist/
+frontend/src-tauri/gen/android/.kotlin/
 
 # Logs
 logs

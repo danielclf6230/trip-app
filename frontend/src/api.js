@@ -19,7 +19,9 @@ async function request(path, { method = "GET", body } = {}) {
   try { data = raw ? JSON.parse(raw) : {}; } catch { data = { error: raw }; }
   if (!response.ok) {
     const detail = typeof data.error === "string" ? data.error : JSON.stringify(data.error);
-    throw new Error(data.message || detail || `Request failed (${response.status})`);
+    const error = new Error(data.message || detail || `Request failed (${response.status})`);
+    error.status = response.status;
+    throw error;
   }
   return data;
 }
@@ -48,8 +50,20 @@ export async function loadTrip(tripId) {
   return { id: data.id, trip: data.trip, canInvite: Boolean(data.canInvite), membershipRole: data.role };
 }
 
-export function saveTrip(tripId, trip) {
-  return request(`/api/trip?tripId=${tripId}`, { method: "PUT", body: trip });
+export async function saveTrip(tripId, trip, base) {
+  try {
+    return await request(`/api/trip?tripId=${tripId}`, {
+      method: "PATCH",
+      body: { base, trip },
+    });
+  } catch (error) {
+    if (error.status !== 404 || !/Cannot PATCH/i.test(error.message)) throw error;
+    const result = await request(`/api/trip?tripId=${tripId}`, {
+      method: "PUT",
+      body: trip,
+    });
+    return { ...result, trip };
+  }
 }
 
 export function loadExchangeRate(from, to) {

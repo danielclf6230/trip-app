@@ -19,6 +19,7 @@ import {
   updateAvatar,
 } from "./api";
 import { getUser, logout, setUser } from "./auth";
+import { mergeTripChanges, tripsAreEqual } from "./tripMerge";
 
 const emptyTrip = {
   tripName: "My Adventure",
@@ -283,6 +284,14 @@ export default function TripToolsApp() {
   const [canInvite, setCanInvite] = useState(false);
   const firstLoad = useRef(true);
   const viewingCompletedTrip = useRef(false);
+  const syncedTrip = useRef(emptyTrip);
+  const latestTrip = useRef(emptyTrip);
+  const activeTripId = useRef(null);
+  const saveQueue = useRef(Promise.resolve());
+
+  useEffect(() => {
+    latestTrip.current = trip;
+  }, [trip]);
 
   useEffect(() => {
     async function prepareTrips() {
@@ -304,8 +313,12 @@ export default function TripToolsApp() {
           : onlyCurrentTrip;
         if (initialTrip) {
           const selected = await loadTrip(initialTrip.id);
+          const prepared = prepareTrip(selected.trip);
+          activeTripId.current = selected.id;
+          syncedTrip.current = prepared;
+          latestTrip.current = prepared;
           setTripId(selected.id);
-          setTrip(prepareTrip(selected.trip));
+          setTrip(prepared);
           setCanInvite(selected.canInvite);
           setView("trip");
         } else {
@@ -330,16 +343,37 @@ export default function TripToolsApp() {
 
   useEffect(() => {
     if (!loaded || firstLoad.current || view !== "trip" || !tripId) return undefined;
+    if (tripsAreEqual(trip, syncedTrip.current)) return undefined;
     setSaveState("Saving…");
     const timer = setTimeout(() => {
-      saveTrip(tripId, trip)
-        .then(() => {
+      const savingTripId = tripId;
+      saveQueue.current = saveQueue.current.then(async () => {
+        if (activeTripId.current !== savingTripId) return;
+        const proposed = latestTrip.current;
+        const base = syncedTrip.current;
+        if (tripsAreEqual(proposed, base)) return;
+
+        try {
+          const result = await saveTrip(savingTripId, proposed, base);
+          if (activeTripId.current !== savingTripId) return;
+          const serverTrip = prepareTrip(result.trip);
+          syncedTrip.current = serverTrip;
+          setTrip((current) => {
+            const rebased = prepareTrip(
+              mergeTripChanges(proposed, current, serverTrip),
+            );
+            latestTrip.current = rebased;
+            return tripsAreEqual(current, rebased) ? current : rebased;
+          });
           setSaveState("Saved");
-          setTripList((current) => current.map((item) => item.id === tripId
-            ? { ...item, tripName: trip.tripName, country: trip.country, city: trip.city, startDate: trip.startDate, endDate: trip.endDate }
+          setTripList((current) => current.map((item) => item.id === savingTripId
+            ? { ...item, tripName: serverTrip.tripName, country: serverTrip.country, city: serverTrip.city, startDate: serverTrip.startDate, endDate: serverTrip.endDate }
             : item));
-        })
-        .catch((error) => setSaveState(`Not saved: ${error.message}`));
+        } catch (error) {
+          if (activeTripId.current === savingTripId)
+            setSaveState(`Not saved: ${error.message}`);
+        }
+      });
     }, 650);
     return () => clearTimeout(timer);
   }, [trip, tripId, loaded, view]);
@@ -394,11 +428,15 @@ export default function TripToolsApp() {
     setSaveState("Loading…");
     await selectActiveTrip(id);
     const selected = await loadTrip(id);
+    const prepared = prepareTrip(selected.trip);
     viewingCompletedTrip.current = tripIsCompleted(
       tripList.find((item) => item.id === id) || selected.trip,
     );
+    activeTripId.current = selected.id;
+    syncedTrip.current = prepared;
+    latestTrip.current = prepared;
     setTripId(selected.id);
-    setTrip(prepareTrip(selected.trip));
+    setTrip(prepared);
     setCanInvite(selected.canInvite);
     setInvite("");
     setView("trip");
@@ -413,6 +451,7 @@ export default function TripToolsApp() {
     try {
       await refreshTrips();
       viewingCompletedTrip.current = false;
+      activeTripId.current = null;
       await selectActiveTrip(null);
       localStorage.setItem(`trip-tools-active-trip-${userId || "account"}`, "list");
       setView("list");
@@ -432,9 +471,11 @@ export default function TripToolsApp() {
     if (!loaded || view !== "trip" || !tripId || !tripEnded || viewingCompletedTrip.current) return undefined;
     const timer = setTimeout(async () => {
       try {
-        await saveTrip(tripId, trip);
+        const result = await saveTrip(tripId, trip, syncedTrip.current);
+        syncedTrip.current = prepareTrip(result.trip);
         await refreshTrips();
         await selectActiveTrip(null);
+        activeTripId.current = null;
         localStorage.setItem(`trip-tools-active-trip-${userId || "account"}`, "list");
         setView("list");
         setSaveState("Trip completed");

@@ -10,6 +10,7 @@ import helmet from "helmet";
 import rateLimit from "express-rate-limit";
 import { makePool } from "./db.js";
 import { loginHandler, requireAuth } from "./auth.js";
+import { mergeTripChanges } from "./trip-merge.js";
 
 if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
   throw new Error("JWT_SECRET must be configured with at least 32 characters.");
@@ -967,6 +968,63 @@ app.put("/api/trip", async (req, res) => {
   } catch (error) {
     console.error("Save trip failed:", error);
     res.status(500).json({ ok: false, error: error.message });
+  }
+});
+
+app.patch("/api/trip", async (req, res) => {
+  const parsed = z
+    .object({ base: TripSchema, trip: TripSchema })
+    .safeParse(req.body);
+  if (!parsed.success)
+    return res.status(400).json({ ok: false, error: parsed.error.flatten() });
+
+  const tripId = Number(req.query.tripId);
+  if (!Number.isSafeInteger(tripId) || tripId < 1)
+    return res.status(400).json({ ok: false, error: "Choose a valid trip." });
+
+  const connection = await pool.getConnection();
+  try {
+    await connection.beginTransaction();
+    const [memberships] = await connection.execute(
+      `SELECT t.id AS trip_id, t.trip_data
+       FROM trip_tools_members m
+       JOIN trip_tools_trips t ON t.id = m.trip_id
+       WHERE m.user_id = ? AND t.id = ?
+       LIMIT 1 FOR UPDATE`,
+      [req.user.id, tripId],
+    );
+    if (!memberships.length) {
+      await connection.rollback();
+      return res
+        .status(404)
+        .json({ ok: false, error: "No trip is connected to this account." });
+    }
+
+    const stored = typeof memberships[0].trip_data === "string"
+      ? JSON.parse(memberships[0].trip_data)
+      : memberships[0].trip_data;
+    const merged = mergeTripChanges(parsed.data.base, parsed.data.trip, stored);
+    const validated = TripSchema.safeParse(merged);
+    if (!validated.success) {
+      await connection.rollback();
+      return res.status(409).json({
+        ok: false,
+        error: "The simultaneous changes could not be merged safely. Reload and try again.",
+      });
+    }
+
+    await connection.execute(
+      "UPDATE trip_tools_trips SET trip_data = ? WHERE id = ?",
+      [JSON.stringify(validated.data), memberships[0].trip_id],
+    );
+    await connection.commit();
+    res.json({ ok: true, trip: validated.data });
+  } catch (error) {
+    await connection.rollback();
+    console.error("Merge trip changes failed:", error);
+    res.status(500).json({ ok: false, error: error.message });
+  } finally {
+    connection.release();
   }
 });
 

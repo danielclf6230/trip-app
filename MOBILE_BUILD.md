@@ -6,11 +6,11 @@ Trip Tools uses one React/Tauri codebase for Windows, Android, and iOS. All buil
 
 The permanent application identifier is `com.danielchow.triptools` and the publisher is Daniel Chow.
 
-## Android test installation
+## Permanent Android installation
 
-The current test APK supports ARM64 phones running Android 7.0 or newer:
+The production APK supports ARM64 phones running Android 7.0 or newer:
 
-`Trip-Tools-0.1.1-android-arm64-debug.apk`
+`Trip-Tools-1.0.0-android-release.apk`
 
 1. Send the APK to the phone using Google Drive, email, USB, or another private file-sharing method.
 2. Open the APK on the phone.
@@ -18,7 +18,29 @@ The current test APK supports ARM64 phones running Android 7.0 or newer:
 4. Return to the installer and tap **Install**.
 5. Open **Trip Tools** and log in normally.
 
-This is a debug-signed test application. A production Play Store release must use the release application ID and a permanent private signing key.
+This APK does not expire. It uses the release application ID and Daniel Chow's permanent private signing key. The old debug build has a different application ID, so remove the old debug app if two Trip Tools icons appear. Trip data is stored by the backend and is available again after logging in.
+
+The signing files are stored outside the Git repository at:
+
+`C:\Users\daniel.chow\Documents\TripApp-signing\android`
+
+Back up that entire folder and save the password shown by `Show-Android-Signing-Password.ps1` in a password manager. Every future direct APK update must use this same signing key.
+
+## Build a permanent Android update
+
+1. Increase the version in `frontend/src-tauri/tauri.conf.json` and `frontend/src-tauri/Cargo.toml`.
+2. Open PowerShell in `frontend`.
+3. Run:
+
+   ```powershell
+   npm run android:build:release
+   ```
+
+4. Send the newly generated release APK to users. Opening it updates the installed app without deleting their local login, provided its version is higher and it is signed with the same key.
+
+The generated APK is under:
+
+`src-tauri/gen/android/app/build/outputs/apk/universal/release/`
 
 ## Build another Android test APK
 
@@ -103,4 +125,3 @@ For later updates, increase the app version, build and upload a new iOS archive,
 
 - Direct APK: send a newly signed APK with the same application ID/signing key and a higher version code. Opening it updates the installed application.
 - Google Play internal/closed testing: upload a signed AAB with a higher version code. Approved testers receive the update through Google Play.
-

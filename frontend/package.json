@@ -13,6 +13,7 @@
     "android:init": "tauri android init",
     "android:dev": "tauri android dev",
     "android:build:debug": "tauri android build --debug --apk --target aarch64 --ci",
+    "android:build:release": "powershell -NoProfile -ExecutionPolicy Bypass -File scripts/build-android-release.ps1",
     "android:build:apk": "tauri android build --apk",
     "android:build:aab": "tauri android build --aab",
     "ios:init": "tauri ios init",
