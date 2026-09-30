@@ -24,6 +24,7 @@ app.use(express.json({ limit: "2mb" }));
 const allowedOrigins = [
   process.env.FRONTEND_ORIGIN,
   "http://localhost:5173",
+  "http://127.0.0.1:5173",
   "http://tauri.localhost",
   "https://trip-pepfij0v3-danielclf6230s-projects.vercel.app",
   "https://trip-app-tool.vercel.app",
@@ -58,8 +59,24 @@ const password = z
   .regex(/[A-Za-z]/)
   .regex(/[0-9]/);
 const exchangeCurrency = z.enum([
-  "CAD", "USD", "EUR", "GBP", "JPY", "CNY", "AUD", "NZD", "CHF",
-  "HKD", "SGD", "KRW", "INR", "MXN", "BRL", "AED", "THB", "PHP",
+  "CAD",
+  "USD",
+  "EUR",
+  "GBP",
+  "JPY",
+  "CNY",
+  "AUD",
+  "NZD",
+  "CHF",
+  "HKD",
+  "SGD",
+  "KRW",
+  "INR",
+  "MXN",
+  "BRL",
+  "AED",
+  "THB",
+  "PHP",
 ]);
 const exchangeRateCache = new Map();
 const EXCHANGE_CACHE_MS = 30 * 60 * 1000;
@@ -70,17 +87,38 @@ const TripSchema = z.object({
   startDate: date,
   endDate: date,
   shoppingCurrency: z
-    .enum(["CAD", "USD", "EUR", "GBP", "JPY", "CNY", "AUD", "NZD", "CHF", "HKD", "SGD", "KRW", "INR", "MXN", "BRL", "AED", "THB", "PHP"])
+    .enum([
+      "CAD",
+      "USD",
+      "EUR",
+      "GBP",
+      "JPY",
+      "CNY",
+      "AUD",
+      "NZD",
+      "CHF",
+      "HKD",
+      "SGD",
+      "KRW",
+      "INR",
+      "MXN",
+      "BRL",
+      "AED",
+      "THB",
+      "PHP",
+    ])
     .optional()
     .default("CAD"),
   shoppingBudget: z.number().min(0).max(1000000000).optional().default(0),
   shopping: z
-    .array(z.object({
-      id,
-      text: z.string().max(240),
-      checked: z.boolean(),
-      price: z.number().min(0).max(1000000000).optional().default(0),
-    }))
+    .array(
+      z.object({
+        id,
+        text: z.string().max(240),
+        checked: z.boolean(),
+        price: z.number().min(0).max(1000000000).optional().default(0),
+      }),
+    )
     .max(500),
   days: z
     .array(
@@ -104,11 +142,13 @@ const TripSchema = z.object({
     )
     .max(60),
   travelers: z
-    .array(z.object({
-      id,
-      name: z.string().max(80),
-      parts: z.number().int().min(1).max(12).optional().default(4),
-    }))
+    .array(
+      z.object({
+        id,
+        name: z.string().max(80),
+        parts: z.number().int().min(1).max(12).optional().default(4),
+      }),
+    )
     .max(30),
   wheelResults: z
     .record(z.number().int().min(0).max(1000000))
@@ -277,7 +317,9 @@ app.patch("/api/auth/avatar", requireAuth, async (req, res) => {
     })
     .safeParse(req.body);
   if (!parsed.success)
-    return res.status(400).json({ ok: false, error: "Choose a valid JPG, PNG, or WebP image." });
+    return res
+      .status(400)
+      .json({ ok: false, error: "Choose a valid JPG, PNG, or WebP image." });
   try {
     await pool.execute("UPDATE trip_users SET avatarUrl = ? WHERE id = ?", [
       parsed.data.avatarUrl,
@@ -344,7 +386,8 @@ app.get("/api/exchange-rate", requireAuth, async (req, res) => {
     console.error("Exchange rate request failed:", error);
     res.status(502).json({
       ok: false,
-      error: "The latest exchange rate is temporarily unavailable. Please try again.",
+      error:
+        "The latest exchange rate is temporarily unavailable. Please try again.",
     });
   }
 });
@@ -482,7 +525,10 @@ app.patch("/api/admin/users/:id/password", async (req, res) => {
   if (!parsed.success || !Number.isSafeInteger(userId) || userId < 1)
     return res
       .status(400)
-      .json({ ok: false, error: "Use at least 6 characters with a letter and a number." });
+      .json({
+        ok: false,
+        error: "Use at least 6 characters with a letter and a number.",
+      });
   const hash = await bcrypt.hash(parsed.data.password, 12);
   const [result] = await pool.execute(
     "UPDATE trip_users SET password = ? WHERE id = ?",
@@ -496,7 +542,8 @@ app.patch("/api/admin/users/:id/password", async (req, res) => {
 app.patch("/api/admin/users/:id/group", async (req, res) => {
   res.status(410).json({
     ok: false,
-    error: "Moving a traveler was replaced by adding or removing individual trip memberships.",
+    error:
+      "Moving a traveler was replaced by adding or removing individual trip memberships.",
   });
 });
 
@@ -522,7 +569,10 @@ app.delete("/api/admin/users/:id", async (req, res) => {
     }
     // Owned trips cannot remain without their owner. Deleting them first also
     // removes their memberships, invites, and active-trip records via cascades.
-    await connection.execute("DELETE FROM trip_tools_trips WHERE owner_user_id = ?", [userId]);
+    await connection.execute(
+      "DELETE FROM trip_tools_trips WHERE owner_user_id = ?",
+      [userId],
+    );
     await connection.execute("DELETE FROM trip_users WHERE id = ?", [userId]);
     await connection.commit();
     res.json({ ok: true });
@@ -637,12 +687,21 @@ app.get("/api/manage/overview", async (req, res) => {
 app.post("/api/manage/groups/:tripId/users/:userId", async (req, res) => {
   const tripId = Number(req.params.tripId);
   const userId = Number(req.params.userId);
-  if (![tripId, userId].every((value) => Number.isSafeInteger(value) && value > 0))
-    return res.status(400).json({ ok: false, error: "Choose a valid user and trip." });
+  if (
+    ![tripId, userId].every((value) => Number.isSafeInteger(value) && value > 0)
+  )
+    return res
+      .status(400)
+      .json({ ok: false, error: "Choose a valid user and trip." });
   try {
     if (!(await managementAccess(req.user.id, tripId)))
-      return res.status(403).json({ ok: false, error: "You can only manage trips you own." });
-    const [[manager]] = await pool.execute("SELECT role FROM trip_users WHERE id = ?", [req.user.id]);
+      return res
+        .status(403)
+        .json({ ok: false, error: "You can only manage trips you own." });
+    const [[manager]] = await pool.execute(
+      "SELECT role FROM trip_users WHERE id = ?",
+      [req.user.id],
+    );
     if (manager.role !== "admin") {
       const [visible] = await pool.execute(
         `SELECT 1 FROM trip_tools_members candidate
@@ -653,9 +712,18 @@ app.post("/api/manage/groups/:tripId/users/:userId", async (req, res) => {
         [req.user.id, userId],
       );
       if (!visible.length)
-        return res.status(403).json({ ok: false, error: "You can add another owner or one of your invited travelers." });
+        return res
+          .status(403)
+          .json({
+            ok: false,
+            error:
+              "You can add another owner or one of your invited travelers.",
+          });
     }
-    const [users] = await pool.execute("SELECT id FROM trip_users WHERE id = ?", [userId]);
+    const [users] = await pool.execute(
+      "SELECT id FROM trip_users WHERE id = ?",
+      [userId],
+    );
     if (!users.length)
       return res.status(404).json({ ok: false, error: "User not found." });
     await pool.execute(
@@ -671,19 +739,32 @@ app.post("/api/manage/groups/:tripId/users/:userId", async (req, res) => {
 app.delete("/api/manage/groups/:tripId/users/:userId", async (req, res) => {
   const tripId = Number(req.params.tripId);
   const userId = Number(req.params.userId);
-  if (![tripId, userId].every((value) => Number.isSafeInteger(value) && value > 0))
-    return res.status(400).json({ ok: false, error: "Choose a valid user and trip." });
+  if (
+    ![tripId, userId].every((value) => Number.isSafeInteger(value) && value > 0)
+  )
+    return res
+      .status(400)
+      .json({ ok: false, error: "Choose a valid user and trip." });
   try {
     if (!(await managementAccess(req.user.id, tripId)))
-      return res.status(403).json({ ok: false, error: "You can only manage trips you own." });
+      return res
+        .status(403)
+        .json({ ok: false, error: "You can only manage trips you own." });
     const [memberships] = await pool.execute(
       "SELECT role FROM trip_tools_members WHERE trip_id = ? AND user_id = ?",
       [tripId, userId],
     );
     if (!memberships.length)
-      return res.status(404).json({ ok: false, error: "That traveler is not in this trip." });
+      return res
+        .status(404)
+        .json({ ok: false, error: "That traveler is not in this trip." });
     if (memberships[0].role === "owner")
-      return res.status(400).json({ ok: false, error: "An owner cannot be removed from their own trip." });
+      return res
+        .status(400)
+        .json({
+          ok: false,
+          error: "An owner cannot be removed from their own trip.",
+        });
     const connection = await pool.getConnection();
     try {
       await connection.beginTransaction();
@@ -745,7 +826,16 @@ function tripDays(startDate, endDate) {
       id: crypto.randomUUID(),
       date: day,
       completed: false,
-      items: [{ id: crypto.randomUUID(), place: "", time: "", duration: "", note: "", checked: false }],
+      items: [
+        {
+          id: crypto.randomUUID(),
+          place: "",
+          time: "",
+          duration: "",
+          note: "",
+          checked: false,
+        },
+      ],
     });
     cursor.setUTCDate(cursor.getUTCDate() + 1);
   }
@@ -775,14 +865,18 @@ app.get("/api/trips", async (req, res) => {
        FROM trip_users u WHERE u.id = ?`,
       [req.user.id],
     );
-    const canManage = permissions[0]?.role === "admin" || Boolean(permissions[0]?.owns_trip);
+    const canManage =
+      permissions[0]?.role === "admin" || Boolean(permissions[0]?.owns_trip);
     res.json({
       ok: true,
       canCreate: canManage,
       canManage,
       activeTripId: activeProfiles[0]?.trip_id ?? null,
       trips: profiles.map((profile) => {
-        const data = typeof profile.trip_data === "string" ? JSON.parse(profile.trip_data) : profile.trip_data;
+        const data =
+          typeof profile.trip_data === "string"
+            ? JSON.parse(profile.trip_data)
+            : profile.trip_data;
         return {
           id: profile.id,
           tripName: data.tripName || "Untitled trip",
@@ -820,11 +914,22 @@ app.delete("/api/trips/:tripId", async (req, res) => {
       return res.status(404).json({ ok: false, error: "Trip not found." });
     }
     const trip = trips[0];
-    if (trip.role !== "admin" && Number(trip.owner_user_id) !== Number(req.user.id)) {
+    if (
+      trip.role !== "admin" &&
+      Number(trip.owner_user_id) !== Number(req.user.id)
+    ) {
       await connection.rollback();
-      return res.status(403).json({ ok: false, error: "Only the trip owner or an administrator can delete this trip." });
+      return res
+        .status(403)
+        .json({
+          ok: false,
+          error:
+            "Only the trip owner or an administrator can delete this trip.",
+        });
     }
-    await connection.execute("DELETE FROM trip_tools_trips WHERE id = ?", [tripId]);
+    await connection.execute("DELETE FROM trip_tools_trips WHERE id = ?", [
+      tripId,
+    ]);
     await connection.commit();
     res.json({ ok: true });
   } catch (error) {
@@ -851,7 +956,9 @@ app.patch("/api/trips/active", async (req, res) => {
     }
     const access = await getTripAccess(req.user.id, parsed.data.tripId);
     if (!access)
-      return res.status(404).json({ ok: false, error: "Trip not found in your group." });
+      return res
+        .status(404)
+        .json({ ok: false, error: "Trip not found in your group." });
     await pool.execute(
       `INSERT INTO trip_tools_active_trips (user_id, trip_id)
        VALUES (?, ?)
@@ -876,7 +983,9 @@ app.post("/api/trips", async (req, res) => {
       [req.user.id],
     );
     if (permissions[0]?.role !== "admin" && !permissions[0]?.owns_trip)
-      return res.status(403).json({ ok: false, error: "Only group owners can create trips." });
+      return res
+        .status(403)
+        .json({ ok: false, error: "Only group owners can create trips." });
     const values = parsed.data;
     const trip = {
       tripName: values.tripName || `${values.city} Adventure`,
@@ -1000,16 +1109,18 @@ app.patch("/api/trip", async (req, res) => {
         .json({ ok: false, error: "No trip is connected to this account." });
     }
 
-    const stored = typeof memberships[0].trip_data === "string"
-      ? JSON.parse(memberships[0].trip_data)
-      : memberships[0].trip_data;
+    const stored =
+      typeof memberships[0].trip_data === "string"
+        ? JSON.parse(memberships[0].trip_data)
+        : memberships[0].trip_data;
     const merged = mergeTripChanges(parsed.data.base, parsed.data.trip, stored);
     const validated = TripSchema.safeParse(merged);
     if (!validated.success) {
       await connection.rollback();
       return res.status(409).json({
         ok: false,
-        error: "The simultaneous changes could not be merged safely. Reload and try again.",
+        error:
+          "The simultaneous changes could not be merged safely. Reload and try again.",
       });
     }
 
