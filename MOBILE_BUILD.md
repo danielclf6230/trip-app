@@ -26,6 +26,8 @@ The signing files are stored outside the Git repository at:
 
 Back up that entire folder and save the password shown by `Show-Android-Signing-Password.ps1` in a password manager. Every future direct APK update must use this same signing key.
 
+########################################################################################
+
 ## Build a permanent Android update
 
 1. Increase the version in `frontend/src-tauri/tauri.conf.json` and `frontend/src-tauri/Cargo.toml`.
@@ -41,6 +43,8 @@ Back up that entire folder and save the password shown by `Show-Android-Signing-
 The generated APK is under:
 
 `src-tauri/gen/android/app/build/outputs/apk/universal/release/`
+
+########################################################################################
 
 ## Build another Android test APK
 
