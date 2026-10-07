@@ -1,3 +1,5 @@
+import ScheduleImport from "./ScheduleImport";
+import { appendImportedStops } from "./scheduleCsv";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -775,6 +777,7 @@ export default function TripToolsApp() {
         )}
         {tab === "schedule" && (
           <Schedule
+            setTrip={setTrip}
             trip={trip}
             dates={tripDates}
             updateDay={updateDay}
@@ -1644,6 +1647,7 @@ function Shopping({ tripId, trip, setTrip, text, setText, editing, setEditing })
 }
 
 function Schedule({
+  setTrip,
   trip,
   dates,
   updateDay,
@@ -1722,11 +1726,13 @@ function Schedule({
             : `Shape each day, then let Trip Tools guide you in ${trip.city || "your destination"}.`
         }
         action={
-          planning ? (
-            <button className="primary-btn" onClick={() => setPlanning(false)}>
-              Done editing ✓
-            </button>
-          ) : null
+          <div className="schedule-heading-actions">
+            <ScheduleImport days={trip.days} onImport={stops => {
+              appendImportedStops(trip.days, stops, makeId);
+              setTrip(current => ({ ...current, days: appendImportedStops(current.days, stops, makeId) }));
+            }} />
+            {planning && <button className="primary-btn" onClick={() => setPlanning(false)}>Done editing &#10003;</button>}
+          </div>
         }
       />
       <div className="day-stack">
