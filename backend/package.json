@@ -7,9 +7,12 @@
     "start": "node server.js",
     "test": "node --test",
     "migrate": "node migrate-trip-tools.js",
-    "rotate-secret": "node rotate-jwt-secret.js"
+    "rotate-secret": "node rotate-jwt-secret.js",
+    "migrate:tooldb": "node migrate-tooldb.js"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.1147.0",
+    "@aws-sdk/s3-request-presigner": "^3.1147.0",
     "bcrypt": "^6.0.0",
     "cors": "^2.8.5",
     "dotenv": "^16.6.1",
@@ -17,6 +20,7 @@
     "express-rate-limit": "^7.4.1",
     "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.3",
+    "multer": "^2.4.0",
     "mysql2": "^3.11.0",
     "zod": "^3.23.8"
   }

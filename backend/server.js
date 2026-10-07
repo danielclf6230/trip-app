@@ -3,6 +3,7 @@ dotenv.config();
 
 import express from "express";
 import cors from "cors";
+import { photoRouter } from "./photos.js";
 import { z } from "zod";
 import bcrypt from "bcrypt";
 import crypto from "crypto";
@@ -114,6 +115,7 @@ const TripSchema = z.object({
     .array(
       z.object({
         id,
+        photoId: z.string().uuid().nullable().optional().default(null),
         text: z.string().max(240),
         checked: z.boolean(),
         price: z.number().min(0).max(1000000000).optional().default(0),
@@ -791,6 +793,7 @@ app.delete("/api/manage/groups/:tripId/users/:userId", async (req, res) => {
 
 app.use("/api/trip", requireAuth);
 app.use("/api/trips", requireAuth);
+app.use("/api/trip/photos", photoRouter(pool, getTripAccess));
 
 async function getTripAccess(userId, tripId) {
   const [rows] = await pool.execute(

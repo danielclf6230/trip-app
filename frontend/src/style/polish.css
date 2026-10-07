@@ -93,3 +93,19 @@
 /* Day-card controls. */
 .day-head-copy{min-width:0}.day-head-actions{display:flex;align-items:center;gap:12px;margin-left:auto}.complete-pill{margin-left:0}.day-head-copy>span{color:#94938a;font-size:11px}.day-collapse{display:grid;place-items:center;flex:0 0 26px;width:26px;height:26px;padding:0;border:1px solid #bfc8c4;border-radius:0;background:transparent;color:var(--ink);font-size:16px;line-height:1}.day-collapse:hover{border-color:var(--ink);background:var(--ink);color:#fff}
 @media(max-width:480px){.wheel-result-list{grid-template-columns:1fr}}
+.shopping-composer .photo-upload{position:relative;padding:0;display:flex;flex-direction:column;align-items:center;justify-content:center;cursor:pointer;overflow:hidden;min-height:72px}
+.shopping-composer .photo-upload small{font-size:8px;text-align:center;letter-spacing:.04em}
+.photo-upload img{width:100%;height:76px;object-fit:cover}
+.photo-upload input[type=file],.row-photo-upload input[type=file]{position:absolute;inset:0;opacity:0;cursor:pointer;width:100%;height:100%;padding:0}
+.photo-upload:focus-within,.row-photo-upload:focus-within{outline:2px solid var(--ink);outline-offset:3px}
+.shopping-row{grid-template-columns:32px 64px minmax(0,1fr) 105px 36px 36px}
+.shopping-photo-cell{position:relative;width:56px;min-height:44px;display:flex;align-items:center;justify-content:center}
+.shopping-thumbnail{padding:0;border:1px solid var(--line);background:transparent;width:48px;height:48px;cursor:zoom-in}
+.shopping-thumbnail img{width:100%;height:100%;object-fit:cover;display:block}
+.row-photo-upload{position:absolute;right:0;bottom:0;display:grid;place-items:center;width:22px;height:22px;background:#fffdf8;border:1px solid var(--line);color:var(--ink);cursor:pointer}
+.photo-error{color:var(--red)}
+.shopping-photo-viewer{border:1px solid var(--line);background:#fffdf8;padding:16px;max-width:92vw;max-height:92dvh;overflow:auto}
+.shopping-photo-viewer::backdrop{background:rgba(0,0,0,.72)}
+.shopping-photo-viewer>button{display:block;margin:0 0 12px auto}
+.shopping-photo-viewer img{display:block;max-width:85vw;max-height:78dvh;object-fit:contain}
+@media(max-width:600px){.shopping-row{grid-template-columns:24px 48px minmax(0,1fr) 68px 26px;gap:5px}.shopping-photo-cell{width:44px}.shopping-thumbnail{width:40px;height:40px}.shopping-composer .photo-upload{padding:0}.shopping-row .item-text{overflow-wrap:anywhere}}

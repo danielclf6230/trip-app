@@ -17,6 +17,8 @@ import {
   saveTrip,
   selectActiveTrip,
   updateAvatar,
+  loadShoppingPhotos,
+  uploadShoppingPhoto,
 } from "./api";
 import { getUser, logout, setUser } from "./auth";
 import { mergeTripChanges, tripsAreEqual } from "./tripMerge";
@@ -739,6 +741,8 @@ export default function TripToolsApp() {
       <section className="content-panel">
         {tab === "shopping" && (
           <Shopping
+            key={tripId}
+            tripId={tripId}
             trip={trip}
             setTrip={setTrip}
             text={shoppingText}
@@ -1348,7 +1352,56 @@ function Exchange({ trip }) {
   );
 }
 
-function Shopping({ trip, setTrip, text, setText, add, editing, setEditing }) {
+function Shopping({ tripId, trip, setTrip, text, setText, editing, setEditing }) {
+  const [photos, setPhotos] = useState({});
+  const [pendingPhoto, setPendingPhoto] = useState(null);
+  const [busy, setBusy] = useState(false);
+  const [photoError, setPhotoError] = useState("");
+  const [viewer, setViewer] = useState(null);
+  const dialog = useRef(null);
+  const photoIds = trip.shopping.map(item => item.photoId || "").join(",");
+  useEffect(() => {
+    let alive = true;
+    async function refreshPhotos() {
+      try {
+        const { photos } = await loadShoppingPhotos(tripId);
+        if (alive) setPhotos(Object.fromEntries(photos.map(photo => [photo.id, photo.url])));
+      } catch (error) { if (alive) setPhotoError(error.message); }
+    }
+    refreshPhotos();
+    const refreshTimer = setInterval(refreshPhotos, 45 * 60 * 1000);
+    const onVisible = () => { if (document.visibilityState === "visible") refreshPhotos(); };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => {
+      alive = false;
+      clearInterval(refreshTimer);
+      document.removeEventListener("visibilitychange", onVisible);
+    };
+  }, [tripId, photoIds]);
+  useEffect(() => { if (viewer) dialog.current?.showModal(); }, [viewer]);
+  async function uploadPhoto(event, itemId = null) {
+    const file = event.target.files?.[0];
+    event.target.value = "";
+    if (!file) return;
+    if (file.size > 10 * 1024 * 1024) { setPhotoError("Images must be 10 MB or smaller."); return; }
+    setBusy(true);
+    setPhotoError("");
+    try {
+      const { photo } = await uploadShoppingPhoto(tripId, file);
+      setPhotos(current => ({ ...current, [photo.id]: photo.url }));
+      if (itemId) update(itemId, { photoId: photo.id });
+      else setPendingPhoto(photo.id);
+    } catch (error) { setPhotoError(error.message); }
+    finally { setBusy(false); }
+  }
+  function submitPhotoItem(event) {
+    event.preventDefault();
+    if (busy || !text.trim()) return;
+    setTrip(current => ({ ...current, shopping: [...current.shopping,
+      { id: makeId(), text: text.trim(), checked: false, price: 0, photoId: pendingPhoto }] }));
+    setText("");
+    setPendingPhoto(null);
+  }
   const packed = trip.shopping.filter((item) => item.checked).length;
   const currency = SHOPPING_CURRENCIES.some(([code]) => code === trip.shoppingCurrency)
     ? trip.shoppingCurrency
@@ -1429,11 +1482,11 @@ function Shopping({ trip, setTrip, text, setText, add, editing, setEditing }) {
           />
         </div>
       </div>
-      <form className="shopping-composer" onSubmit={add}>
-        <div className="composer-seal">
-          <span>LIST</span>
-          <small>SHOPPING</small>
-        </div>
+      <form className="shopping-composer" onSubmit={submitPhotoItem}>
+        <label className="composer-seal photo-upload" title="Upload an item photo">
+          {pendingPhoto ? <img src={photos[pendingPhoto]} alt="Selected item" /> : <><span>+</span><small>{busy ? "UPLOADING..." : "UPLOAD PHOTO"}</small></>}
+          <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" disabled={busy} onChange={uploadPhoto} aria-label="Upload item photo" />
+        </label>
         <label>
           <small>ADD A PURCHASE OR PACKING ITEM</small>
           <input
@@ -1442,11 +1495,17 @@ function Shopping({ trip, setTrip, text, setText, add, editing, setEditing }) {
             placeholder={`What do you need for ${trip.city || "your trip"}?`}
           />
         </label>
-        <button>
+        <button disabled={busy || !text.trim()}>
           <span>Add item</span>
           <small>ADD TO LIST</small>
         </button>
       </form>
+      {pendingPhoto && <button className="outline-btn" onClick={() => setPendingPhoto(null)}>Remove selected photo</button>}
+      {photoError && <p role="alert" className="photo-error">{photoError}</p>}
+      <dialog ref={dialog} className="shopping-photo-viewer" onClose={() => setViewer(null)} onClick={event => { if (event.target === event.currentTarget) dialog.current.close(); }}>
+        <button autoFocus className="outline-btn" onClick={() => dialog.current.close()} aria-label="Close image">Close ?</button>
+        {viewer && <img src={photos[viewer.id]} alt={viewer.text} />}
+      </dialog>
       <div className="clean-list">
         {trip.shopping.length ? (
           trip.shopping.map((item) => (
@@ -1464,6 +1523,13 @@ function Shopping({ trip, setTrip, text, setText, add, editing, setEditing }) {
                 />
                 <span>✓</span>
               </label>
+              <div className="shopping-photo-cell">
+                {photos[item.photoId] && <button className="shopping-thumbnail" onClick={() => setViewer({ id: item.photoId, text: item.text })} aria-label={`Enlarge photo of ${item.text}`}><img src={photos[item.photoId]} alt={item.text} loading="lazy" /></button>}
+                <label className="row-photo-upload" title={item.photoId ? "Replace photo" : "Add photo"}>
+                  {item.photoId ? "?" : "?"}
+                  <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" disabled={busy} onChange={event => uploadPhoto(event, item.id)} aria-label={`Upload photo for ${item.text}`} />
+                </label>
+              </div>
               {editing === item.id ? (
                 <input
                   className="inline-edit"

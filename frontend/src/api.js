@@ -11,8 +11,8 @@ async function request(path, { method = "GET", body } = {}) {
   const token = getToken();
   const response = await fetch(`${base}${path}`, {
     method,
-    headers: { "Content-Type": "application/json", ...(token ? { Authorization: `Bearer ${token}` } : {}) },
-    body: body === undefined ? undefined : JSON.stringify(body),
+    headers: { ...(body instanceof FormData ? {} : { "Content-Type": "application/json" }), ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+    body: body === undefined ? undefined : body instanceof FormData ? body : JSON.stringify(body),
   });
   const raw = await response.text();
   let data = {};
@@ -125,4 +125,13 @@ export function removeUserFromGroup(userId, groupId) {
 
 export function deleteAdminUser(id) {
   return request(`/api/admin/users/${id}`, { method: "DELETE" });
+}
+
+export function loadShoppingPhotos(tripId) {
+  return request(`/api/trip/photos?tripId=${tripId}`);
+}
+export function uploadShoppingPhoto(tripId, file) {
+  const body = new FormData();
+  body.append("image", file);
+  return request(`/api/trip/photos?tripId=${tripId}`, { method: "POST", body });
 }

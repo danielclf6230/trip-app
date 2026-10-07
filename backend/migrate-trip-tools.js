@@ -12,9 +12,14 @@ try {
   const connection = await pool.getConnection();
   try {
     await connection.beginTransaction();
-    await connection.query("CREATE TABLE IF NOT EXISTS trip_users LIKE users");
-    await connection.query(`INSERT IGNORE INTO trip_users (id, name, password, avatarUrl, bannerUrl, created_at)
-      SELECT id, name, password, avatarUrl, bannerUrl, created_at FROM users`);
+    const [existingUsers] = await connection.query("SHOW TABLES LIKE 'trip_users'");
+    if (!existingUsers.length) {
+      await connection.query(`CREATE TABLE trip_users (
+        id INT NOT NULL AUTO_INCREMENT PRIMARY KEY, name VARCHAR(100) NOT NULL UNIQUE,
+        password VARCHAR(255) NOT NULL, avatarUrl MEDIUMTEXT NULL, bannerUrl MEDIUMTEXT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+      )`);
+    }
     const [roleColumns] = await connection.query("SHOW COLUMNS FROM trip_users LIKE 'role'");
     if (!roleColumns.length) await connection.query("ALTER TABLE trip_users ADD COLUMN role ENUM('admin', 'user') NOT NULL DEFAULT 'user' AFTER password");
     const [invitedByColumns] = await connection.query("SHOW COLUMNS FROM trip_users LIKE 'invited_by_user_id'");
@@ -267,6 +272,15 @@ try {
         "INSERT INTO trip_tools_migrations (migration_key) VALUES ('one_group_per_trip_v7')",
       );
     }
+  await connection.query(`CREATE TABLE IF NOT EXISTS trip_tools_photos (
+    id CHAR(36) PRIMARY KEY, trip_id INT NOT NULL, uploaded_by INT NULL,
+    s3_key VARCHAR(512) NOT NULL, url VARCHAR(1024) NOT NULL,
+    content_type VARCHAR(40) NOT NULL, size_bytes INT NOT NULL,
+    created_at TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    INDEX idx_photo_trip (trip_id),
+    CONSTRAINT fk_photo_trip FOREIGN KEY (trip_id) REFERENCES trip_tools_trips(id) ON DELETE CASCADE,
+    CONSTRAINT fk_photo_user FOREIGN KEY (uploaded_by) REFERENCES trip_users(id) ON DELETE SET NULL
+  )`);
     await connection.commit();
     const [[userCount]] = await connection.query("SELECT COUNT(*) AS count FROM trip_users");
     const [[tripCount]] = await connection.query("SELECT COUNT(*) AS count FROM trip_tools_trips");
