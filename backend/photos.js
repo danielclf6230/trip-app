@@ -66,5 +66,32 @@ export function photoRouter(pool, getTripAccess) {
       next(error);
     }
   });
+  router.delete('/shopping/:itemId', async (req, res, next) => {
+    const connection = await pool.getConnection();
+    try {
+      await connection.beginTransaction();
+      const [rows] = await connection.execute('SELECT trip_data FROM trip_tools_trips WHERE id = ? FOR UPDATE', [req.tripId]);
+      if (!rows.length) throw new Error('Trip not found.');
+      const trip = typeof rows[0].trip_data === 'string' ? JSON.parse(rows[0].trip_data) : rows[0].trip_data;
+      const item = trip.shopping.find(item => item.id === req.params.itemId);
+      const photoIds = [...new Set([item?.photoId, req.body?.photoId].filter(value => typeof value === 'string'))];
+      trip.shopping = trip.shopping.filter(item => item.id !== req.params.itemId);
+      for (const photoId of photoIds) {
+        if (trip.shopping.some(item => item.photoId === photoId)) continue;
+        const [photos] = await connection.execute('SELECT s3_key FROM trip_tools_photos WHERE id = ? AND trip_id = ?', [photoId, req.tripId]);
+        if (!photos.length) continue;
+        const { AWS_REGION, S3_BUCKET } = process.env;
+        if (!AWS_REGION || !S3_BUCKET) throw new Error('Photo storage is not configured.');
+        const s3 = new S3Client({ region: AWS_REGION });
+        try { await s3.send(new DeleteObjectCommand({ Bucket: S3_BUCKET, Key: photos[0].s3_key })); }
+        finally { s3.destroy(); }
+        await connection.execute('DELETE FROM trip_tools_photos WHERE id = ? AND trip_id = ?', [photoId, req.tripId]);
+      }
+      await connection.execute('UPDATE trip_tools_trips SET trip_data = ? WHERE id = ?', [JSON.stringify(trip), req.tripId]);
+      await connection.commit();
+      res.json({ ok: true });
+    } catch (error) { await connection.rollback(); next(error); }
+    finally { connection.release(); }
+  });
   return router;
 }

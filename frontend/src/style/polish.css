@@ -109,3 +109,19 @@
 .shopping-photo-viewer>button{display:block;margin:0 0 12px auto}
 .shopping-photo-viewer img{display:block;max-width:85vw;max-height:78dvh;object-fit:contain}
 @media(max-width:600px){.shopping-row{grid-template-columns:24px 48px minmax(0,1fr) 68px 26px;gap:5px}.shopping-photo-cell{width:44px}.shopping-thumbnail{width:40px;height:40px}.shopping-composer .photo-upload{padding:0}.shopping-row .item-text{overflow-wrap:anywhere}}
+
+.shopping-photo-cell{width:56px;height:48px;min-height:48px;align-items:center;justify-content:center}
+.shopping-photo-control{position:relative;inset:auto;display:grid;place-items:center;width:40px;height:40px;padding:0;border:1px solid var(--line);background:#fffdf8;color:var(--ink);cursor:pointer;box-sizing:border-box;overflow:hidden}
+.shopping-photo-control svg{width:20px;height:20px;fill:none;stroke:currentColor;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}
+.shopping-photo-control:hover{border-color:var(--ink)}
+.shopping-photo-control:focus-visible{outline:2px solid var(--ink);outline-offset:3px}
+.shopping-thumbnail img{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:.6}
+.photo-magnifier{position:relative;display:grid;place-items:center;width:26px;height:26px;border-radius:50%;background:rgba(255,253,248,.9)}
+.viewer-photo-replace{position:relative;display:block;width:fit-content;margin:12px auto 0;padding:8px 14px;border:1px solid var(--line);cursor:pointer;color:var(--ink)}
+.viewer-photo-replace input{position:absolute;inset:0;opacity:0;width:100%;height:100%;cursor:pointer}
+@media(max-width:600px){.shopping-photo-cell{width:44px}.shopping-photo-control{width:36px;height:36px}}
+
+.shopping-photo-viewer{position:fixed;padding:42px 18px 18px}
+.shopping-photo-viewer>.modal-close{position:absolute;top:8px;right:10px;width:28px;height:28px;margin:0;padding:0;border:0;background:transparent;color:#777;font-size:24px;line-height:1;display:grid;place-items:center;cursor:pointer}
+.shopping-photo-viewer .viewer-photo-replace{width:40px;height:40px;padding:0;margin:14px auto 0}
+.shopping-photo-viewer .viewer-photo-replace:focus-within{outline:2px solid var(--ink);outline-offset:3px}

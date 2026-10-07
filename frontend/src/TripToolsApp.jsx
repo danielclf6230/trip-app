@@ -19,6 +19,7 @@ import {
   updateAvatar,
   loadShoppingPhotos,
   uploadShoppingPhoto,
+  deleteShoppingItem,
 } from "./api";
 import { getUser, logout, setUser } from "./auth";
 import { mergeTripChanges, tripsAreEqual } from "./tripMerge";
@@ -1429,11 +1430,17 @@ function Shopping({ tripId, trip, setTrip, text, setText, editing, setEditing })
         item.id === id ? { ...item, ...values } : item,
       ),
     }));
-  const remove = (id) =>
-    setTrip((current) => ({
-      ...current,
-      shopping: current.shopping.filter((item) => item.id !== id),
-    }));
+  async function remove(id) {
+    if (busy) return;
+    setBusy(true);
+    setPhotoError("");
+    try {
+      const item = trip.shopping.find(item => item.id === id);
+      await deleteShoppingItem(tripId, id, item?.photoId);
+      setTrip(current => ({ ...current, shopping: current.shopping.filter(item => item.id !== id) }));
+    } catch (error) { setPhotoError(`Could not delete item: ${error.message}`); }
+    finally { setBusy(false); }
+  }
   return (
     <>
       <SectionTitle
@@ -1503,8 +1510,14 @@ function Shopping({ tripId, trip, setTrip, text, setText, editing, setEditing })
       {pendingPhoto && <button className="outline-btn" onClick={() => setPendingPhoto(null)}>Remove selected photo</button>}
       {photoError && <p role="alert" className="photo-error">{photoError}</p>}
       <dialog ref={dialog} className="shopping-photo-viewer" onClose={() => setViewer(null)} onClick={event => { if (event.target === event.currentTarget) dialog.current.close(); }}>
-        <button autoFocus className="outline-btn" onClick={() => dialog.current.close()} aria-label="Close image">Close ?</button>
-        {viewer && <img src={photos[viewer.id]} alt={viewer.text} />}
+        <button type="button" autoFocus className="modal-close" onClick={() => dialog.current.close()} aria-label="Close image">&#215;</button>
+        {viewer && <>
+          <img src={photos[viewer.id]} alt={viewer.text} />
+          <label className="viewer-photo-replace shopping-photo-control" title="Upload replacement photo">
+            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V3m-5 5 5-5 5 5M4 15v5h16v-5" /></svg>
+            <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" disabled={busy} onChange={event => { const item = trip.shopping.find(item => item.photoId === viewer.id); if (item) { uploadPhoto(event, item.id); dialog.current.close(); } }} aria-label="Upload replacement photo" />
+          </label>
+        </>}
       </dialog>
       <div className="clean-list">
         {trip.shopping.length ? (
@@ -1524,11 +1537,17 @@ function Shopping({ tripId, trip, setTrip, text, setText, editing, setEditing })
                 <span>✓</span>
               </label>
               <div className="shopping-photo-cell">
-                {photos[item.photoId] && <button className="shopping-thumbnail" onClick={() => setViewer({ id: item.photoId, text: item.text })} aria-label={`Enlarge photo of ${item.text}`}><img src={photos[item.photoId]} alt={item.text} loading="lazy" /></button>}
-                <label className="row-photo-upload" title={item.photoId ? "Replace photo" : "Add photo"}>
-                  {item.photoId ? "?" : "?"}
-                  <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" disabled={busy} onChange={event => uploadPhoto(event, item.id)} aria-label={`Upload photo for ${item.text}`} />
-                </label>
+                {item.photoId ? (
+                  <button type="button" className="shopping-photo-control shopping-thumbnail" disabled={!photos[item.photoId]} onClick={() => setViewer({ id: item.photoId, text: item.text })} aria-label={`Enlarge photo of ${item.text}`} title="View photo">
+                    {photos[item.photoId] && <img src={photos[item.photoId]} alt="" loading="lazy" />}
+                    <span className="photo-magnifier"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6" /><path d="m15 15 5 5" /></svg></span>
+                  </button>
+                ) : (
+                  <label className="shopping-photo-control row-photo-upload" title="Upload photo">
+                    <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V3m-5 5 5-5 5 5M4 15v5h16v-5" /></svg>
+                    <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" disabled={busy} onChange={event => uploadPhoto(event, item.id)} aria-label={`Upload photo for ${item.text}`} />
+                  </label>
+                )}
               </div>
               {editing === item.id ? (
                 <input

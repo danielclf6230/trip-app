@@ -135,3 +135,7 @@ export function uploadShoppingPhoto(tripId, file) {
   body.append("image", file);
   return request(`/api/trip/photos?tripId=${tripId}`, { method: "POST", body });
 }
+
+export function deleteShoppingItem(tripId, itemId, photoId) {
+  return request(`/api/trip/photos/shopping/${encodeURIComponent(itemId)}?tripId=${tripId}`, { method: "DELETE", body: { photoId } });
+}
