@@ -1601,6 +1601,7 @@ function Shopping({ tripId, trip, setTrip, text, setText, editing, setEditing })
               ) : (
                 <button
                   className="item-text"
+                  title={item.text}
                   onClick={() => setEditing(item.id)}
                 >
                   {item.text}
