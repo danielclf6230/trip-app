@@ -17,6 +17,7 @@ import {
   saveTrip,
   selectActiveTrip,
   updateAvatar,
+  loadAvatar,
   loadShoppingPhotos,
   uploadShoppingPhoto,
   deleteShoppingItem,
@@ -263,6 +264,25 @@ export default function TripToolsApp() {
   const user = getUser();
   const [account, setAccount] = useState(user);
   const userId = account?.id;
+  useEffect(() => {
+    let alive = true;
+    async function refreshAvatar() {
+      try {
+        const { avatarUrl } = await loadAvatar();
+        if (alive) {
+          setAccount(current => ({ ...current, avatarUrl }));
+          const current = getUser();
+          if (current?.id === userId) setUser({ ...current, avatarUrl });
+        }
+      } catch (error) { console.error("Avatar refresh failed:", error.message); }
+    }
+    refreshAvatar();
+    const timer = setInterval(refreshAvatar, 45 * 60 * 1000);
+    const onVisible = () => { if (document.visibilityState === "visible") refreshAvatar(); };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => { alive = false; clearInterval(timer); document.removeEventListener("visibilitychange", onVisible); };
+  }, [userId]);
+
   const [trip, setTrip] = useState(emptyTrip);
   const [tripId, setTripId] = useState(null);
   const [tripList, setTripList] = useState([]);
@@ -1356,6 +1376,7 @@ function Exchange({ trip }) {
 function Shopping({ tripId, trip, setTrip, text, setText, editing, setEditing }) {
   const [photos, setPhotos] = useState({});
   const [pendingPhoto, setPendingPhoto] = useState(null);
+  useEffect(() => () => { if (pendingPhoto) URL.revokeObjectURL(pendingPhoto.url); }, [pendingPhoto]);
   const [busy, setBusy] = useState(false);
   const [photoError, setPhotoError] = useState("");
   const [viewer, setViewer] = useState(null);
@@ -1385,23 +1406,39 @@ function Shopping({ tripId, trip, setTrip, text, setText, editing, setEditing })
     event.target.value = "";
     if (!file) return;
     if (file.size > 10 * 1024 * 1024) { setPhotoError("Images must be 10 MB or smaller."); return; }
+    if (!itemId) {
+      setPendingPhoto({ file, url: URL.createObjectURL(file) });
+      setPhotoError("");
+      return;
+    }
     setBusy(true);
     setPhotoError("");
     try {
-      const { photo } = await uploadShoppingPhoto(tripId, file);
+      const item = trip.shopping.find(item => item.id === itemId);
+      if (!item) return;
+      const { photo } = await uploadShoppingPhoto(tripId, file, item);
       setPhotos(current => ({ ...current, [photo.id]: photo.url }));
-      if (itemId) update(itemId, { photoId: photo.id });
-      else setPendingPhoto(photo.id);
+      update(itemId, { photoId: photo.id });
     } catch (error) { setPhotoError(error.message); }
     finally { setBusy(false); }
   }
-  function submitPhotoItem(event) {
+  async function submitPhotoItem(event) {
     event.preventDefault();
     if (busy || !text.trim()) return;
-    setTrip(current => ({ ...current, shopping: [...current.shopping,
-      { id: makeId(), text: text.trim(), checked: false, price: 0, photoId: pendingPhoto }] }));
-    setText("");
-    setPendingPhoto(null);
+    const item = { id: makeId(), text: text.trim(), checked: false, price: 0 };
+    setBusy(true);
+    setPhotoError("");
+    try {
+      if (pendingPhoto) {
+        const { photo } = await uploadShoppingPhoto(tripId, pendingPhoto.file, item, true);
+        item.photoId = photo.id;
+        setPhotos(current => ({ ...current, [photo.id]: photo.url }));
+      }
+      setTrip(current => ({ ...current, shopping: [...current.shopping, item] }));
+      setText("");
+      setPendingPhoto(null);
+    } catch (error) { setPhotoError(error.message); }
+    finally { setBusy(false); }
   }
   const packed = trip.shopping.filter((item) => item.checked).length;
   const currency = SHOPPING_CURRENCIES.some(([code]) => code === trip.shoppingCurrency)
@@ -1491,12 +1528,13 @@ function Shopping({ tripId, trip, setTrip, text, setText, editing, setEditing })
       </div>
       <form className="shopping-composer" onSubmit={submitPhotoItem}>
         <label className="composer-seal photo-upload" title="Upload an item photo">
-          {pendingPhoto ? <img src={photos[pendingPhoto]} alt="Selected item" /> : <><span>+</span><small>{busy ? "UPLOADING..." : "UPLOAD PHOTO"}</small></>}
+          {pendingPhoto ? <img src={pendingPhoto.url} alt="Selected item" /> : <><span>+</span><small>{busy ? "UPLOADING..." : "UPLOAD PHOTO"}</small></>}
           <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" disabled={busy} onChange={uploadPhoto} aria-label="Upload item photo" />
         </label>
         <label>
           <small>ADD A PURCHASE OR PACKING ITEM</small>
           <input
+            disabled={busy}
             value={text}
             onChange={(e) => setText(e.target.value)}
             placeholder={`What do you need for ${trip.city || "your trip"}?`}
@@ -1507,16 +1545,19 @@ function Shopping({ tripId, trip, setTrip, text, setText, editing, setEditing })
           <small>ADD TO LIST</small>
         </button>
       </form>
-      {pendingPhoto && <button className="outline-btn" onClick={() => setPendingPhoto(null)}>Remove selected photo</button>}
       {photoError && <p role="alert" className="photo-error">{photoError}</p>}
-      <dialog ref={dialog} className="shopping-photo-viewer" onClose={() => setViewer(null)} onClick={event => { if (event.target === event.currentTarget) dialog.current.close(); }}>
+      <dialog ref={dialog} aria-label="Item photo" className="shopping-photo-viewer" onClose={() => setViewer(null)} onClick={event => { if (event.target === event.currentTarget) dialog.current.close(); }}>
         <button type="button" autoFocus className="modal-close" onClick={() => dialog.current.close()} aria-label="Close image">&#215;</button>
         {viewer && <>
-          <img src={photos[viewer.id]} alt={viewer.text} />
+          <header className="photo-viewer-header"><span>Item photo</span><h3>{viewer.text}</h3></header>
+          <div className="photo-viewer-image"><img src={photos[viewer.id]} alt={viewer.text} /></div>
+          <footer className="photo-viewer-footer">
           <label className="viewer-photo-replace shopping-photo-control" title="Upload replacement photo">
             <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 16V3m-5 5 5-5 5 5M4 15v5h16v-5" /></svg>
             <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" disabled={busy} onChange={event => { const item = trip.shopping.find(item => item.photoId === viewer.id); if (item) { uploadPhoto(event, item.id); dialog.current.close(); } }} aria-label="Upload replacement photo" />
+            <span>{busy ? "Uploading..." : "Replace photo"}</span>
           </label>
+          </footer>
         </>}
       </dialog>
       <div className="clean-list">
@@ -1540,7 +1581,6 @@ function Shopping({ tripId, trip, setTrip, text, setText, editing, setEditing })
                 {item.photoId ? (
                   <button type="button" className="shopping-photo-control shopping-thumbnail" disabled={!photos[item.photoId]} onClick={() => setViewer({ id: item.photoId, text: item.text })} aria-label={`Enlarge photo of ${item.text}`} title="View photo">
                     {photos[item.photoId] && <img src={photos[item.photoId]} alt="" loading="lazy" />}
-                    <span className="photo-magnifier"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10" cy="10" r="6" /><path d="m15 15 5 5" /></svg></span>
                   </button>
                 ) : (
                   <label className="shopping-photo-control row-photo-upload" title="Upload photo">

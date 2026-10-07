@@ -1,3 +1,4 @@
+import { avatarUrlForDisplay } from "./avatars.js";
 import dotenv from "dotenv";
 dotenv.config();
 
@@ -306,6 +307,15 @@ app.patch("/api/auth/password", authLimiter, requireAuth, async (req, res) => {
       .status(500)
       .json({ ok: false, error: "Could not update the password." });
   }
+});
+
+app.get("/api/auth/avatar", requireAuth, async (req, res, next) => {
+  try {
+    const [rows] = await pool.execute("SELECT avatarUrl FROM trip_users WHERE id = ?", [req.user.id]);
+    if (!rows.length) return res.status(404).json({ error: "User not found." });
+    res.set("Cache-Control", "no-store");
+    res.json({ avatarUrl: await avatarUrlForDisplay(rows[0].avatarUrl) });
+  } catch (error) { next(error); }
 });
 
 app.patch("/api/auth/avatar", requireAuth, async (req, res) => {
@@ -1157,7 +1167,7 @@ app.get("/api/trip/members", async (req, res) => {
        JOIN trip_users u ON u.id = m.user_id WHERE m.trip_id = ? ORDER BY m.joined_at`,
       [membership.trip_id],
     );
-    res.json({ ok: true, members });
+    res.json({ ok: true, members: await Promise.all(members.map(async member => ({ ...member, avatarUrl: await avatarUrlForDisplay(member.avatarUrl) }))) });
   } catch (error) {
     res.status(500).json({ ok: false, error: error.message });
   }

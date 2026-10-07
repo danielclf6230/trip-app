@@ -130,12 +130,16 @@ export function deleteAdminUser(id) {
 export function loadShoppingPhotos(tripId) {
   return request(`/api/trip/photos?tripId=${tripId}`);
 }
-export function uploadShoppingPhoto(tripId, file) {
+export function uploadShoppingPhoto(tripId, file, item, create = false) {
   const body = new FormData();
   body.append("image", file);
+  body.append("item", JSON.stringify(item));
+  body.append("create", String(create));
   return request(`/api/trip/photos?tripId=${tripId}`, { method: "POST", body });
 }
 
 export function deleteShoppingItem(tripId, itemId, photoId) {
   return request(`/api/trip/photos/shopping/${encodeURIComponent(itemId)}?tripId=${tripId}`, { method: "DELETE", body: { photoId } });
 }
+
+export function loadAvatar() { return request("/api/auth/avatar"); }

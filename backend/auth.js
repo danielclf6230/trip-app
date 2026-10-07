@@ -1,3 +1,4 @@
+import { avatarUrlForDisplay } from "./avatars.js";
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
@@ -35,7 +36,7 @@ export async function loginHandler(req, res, pool) {
     res.json({
       id: user.id,
       name: user.name,
-      avatarUrl: user.avatarUrl || null,
+      avatarUrl: await avatarUrlForDisplay(user.avatarUrl || null),
       bannerUrl: user.bannerUrl || null,
       role: user.role || "user",
       token,
