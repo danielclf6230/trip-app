@@ -44,6 +44,8 @@ The generated APK is under:
 
 `src-tauri/gen/android/app/build/outputs/apk/universal/release/`
 
+'Trip-Tools-1.0.1-android-release.apk'
+
 ########################################################################################
 
 ## Build another Android test APK
