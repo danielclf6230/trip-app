@@ -1,5 +1,5 @@
 import ScheduleImport from "./ScheduleImport";
-import { appendImportedStops } from "./scheduleCsv";
+import { replaceImportedStops } from "./scheduleCsv";
 import { reorderScheduleItems } from "./scheduleOrder";
 import { DndContext, PointerSensor, closestCenter, useSensor, useSensors } from "@dnd-kit/core";
 import { SortableContext, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
@@ -1732,8 +1732,8 @@ function Schedule({
         action={
           <div className="schedule-heading-actions">
             <ScheduleImport days={trip.days} onImport={stops => {
-              appendImportedStops(trip.days, stops, makeId);
-              setTrip(current => ({ ...current, days: appendImportedStops(current.days, stops, makeId) }));
+              replaceImportedStops(trip.days, stops, () => 'preview');
+              setTrip(current => ({ ...current, days: replaceImportedStops(current.days, stops, makeId) }));
             }} />
             {planning && <button className="primary-btn" onClick={() => setPlanning(false)}>Done editing &#10003;</button>}
           </div>
@@ -1861,8 +1861,8 @@ function DayEditor({ day, index, updateDay }) {
           <button type="button" className="add-stop" onClick={addStop}>
             ＋ Add another place
           </button>
-          <button type="button" className="clean-day" onClick={cleanDay} disabled={!day.items.length} aria-label={`Clean all places from ${prettyDate(day.date, { weekday: true })}`}>
-            Clean
+          <button type="button" className="clean-day" onClick={cleanDay} disabled={!day.items.length} aria-label={`Clear all places from ${prettyDate(day.date, { weekday: true })}`}>
+            Clear
           </button>
         </div>
       </div>

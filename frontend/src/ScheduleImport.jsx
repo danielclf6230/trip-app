@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { parseScheduleCsv, appendImportedStops } from './scheduleCsv';
+import { parseScheduleCsv, replaceImportedStops } from './scheduleCsv';
 
 export default function ScheduleImport({ days, onImport }) {
   const dialog = useRef(null);
@@ -28,7 +28,7 @@ export default function ScheduleImport({ days, onImport }) {
   }
   function confirm() {
     try {
-      appendImportedStops(days, stops, () => 'preview');
+      replaceImportedStops(days, stops, () => 'preview');
       onImport(stops);
       dialog.current.close(); setSource(''); setStops(null); setError('');
     } catch (error) { setError(error.message); }
@@ -56,12 +56,12 @@ Use 24-hour HH:MM times. Leave missing times, durations, or notes empty. Keep th
       <p>Give the template and your itinerary to ChatGPT or another AI, along with the copied instructions. Then upload the completed CSV here and review it.</p>
       {stops ? <button className="outline-btn" onClick={() => setStops(null)}>Edit CSV</button> : <textarea ref={csvInput} aria-label="CSV contents" value={source} onChange={event => { setSource(event.target.value); setStops(null); setError(''); }} placeholder={'day,place,time,duration,note\n1,Senso-ji Temple,09:00,1 hour,Explore the temple'} />}
       {error && <p role="alert" className="import-error">{error}</p>}
-      {stops && <section className="schedule-import-preview"><h4>Review {stops.length} stops</h4><p>These stops will be added to your existing plan. Nothing is saved until you confirm.</p>{days.map(day => {
+      {stops && <section className="schedule-import-preview"><h4>Review {stops.length} stops</h4><p>Confirming will remove every existing place from all trip days and replace the schedule with these stops. Days not in the CSV will be empty.</p>{days.map(day => {
         const items = stops.filter(stop => stop.date === day.date);
         return items.length ? <div key={day.id}><b>{day.date}</b>{items.map((stop, i) => <div className="import-stop" key={i}><time>{stop.time || 'No time'}</time><span>{stop.place}{stop.duration && <small>{stop.duration}</small>}{stop.note && <small>{stop.note}</small>}</span></div>)}</div> : null;
       })}</section>}
       </div>
-      <footer><button className="outline-btn" onClick={() => dialog.current.close()}>Cancel</button>{stops ? <button className="primary-btn" onClick={confirm}>Add {stops.length} stops</button> : <button className="primary-btn" disabled={busy || !source.trim()} onClick={review}>Review import</button>}</footer>
+      <footer><button className="outline-btn" onClick={() => dialog.current.close()}>Cancel</button>{stops ? <button className="primary-btn" onClick={confirm}>Replace schedule</button> : <button className="primary-btn" disabled={busy || !source.trim()} onClick={review}>Review import</button>}</footer>
     </dialog>
   </>;
 }

@@ -56,13 +56,13 @@ export function parseScheduleCsv(source, days) {
   });
 }
 
-export function appendImportedStops(days, stops, makeId) {
+export function replaceImportedStops(days, stops, makeId) {
   if (stops.some(stop => !days.some(day => day.date === stop.date))) throw new Error('Trip dates changed. Please review the CSV again.');
   return days.map(day => {
-    const extra = stops.filter(stop => stop.date === day.date).map(({ date, ...stop }) => ({ ...stop, id: makeId(), checked: false }));
-    if (!extra.length) return day;
-    const existing = day.items.filter(item => item.place || item.time || item.duration || item.note || item.checked);
-    if (existing.length + extra.length > 500) throw new Error('A day cannot have more than 500 stops.');
-    return { ...day, completed: false, items: [...existing, ...extra] };
+    const items = stops.filter(stop => stop.date === day.date).map(stop => ({
+      id: makeId(), place: stop.place, time: stop.time, duration: stop.duration,
+      note: stop.note, checked: false,
+    }));
+    return { ...day, completed: false, items };
   });
 }
