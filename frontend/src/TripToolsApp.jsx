@@ -1,6 +1,9 @@
 import ScheduleImport from "./ScheduleImport";
 import { appendImportedStops } from "./scheduleCsv";
 import { reorderScheduleItems } from "./scheduleOrder";
+import { DndContext, PointerSensor, closestCenter, useSensor, useSensors } from "@dnd-kit/core";
+import { SortableContext, verticalListSortingStrategy, useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import {
@@ -1752,9 +1755,7 @@ function Schedule({
 
 function DayEditor({ day, index, updateDay }) {
   const [isCollapsed, setIsCollapsed] = useState(false);
-  const [draggingStopId, setDraggingStopId] = useState(null);
-  const [dropIndicator, setDropIndicator] = useState(null);
-  const dragState = useRef({ sourceId: null, targetId: null, after: false });
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
   const editorId = `day-editor-${day.id}`;
   const addStop = () =>
     updateDay(day.id, (value) => ({
@@ -1773,58 +1774,12 @@ function DayEditor({ day, index, updateDay }) {
       ...value,
       items: value.items.filter((item) => item.id !== id),
     }));
-  const resetDrag = () => {
-    dragState.current = { sourceId: null, targetId: null, after: false };
-    setDraggingStopId(null);
-    setDropIndicator(null);
-  };
-  const setDropTarget = (targetId, after) => {
-    if (!dragState.current.sourceId || targetId === dragState.current.sourceId) {
-      dragState.current.targetId = null;
-      setDropIndicator(null);
-      return;
-    }
-    if (dragState.current.targetId === targetId && dragState.current.after === after) return;
-    dragState.current.targetId = targetId;
-    dragState.current.after = after;
-    setDropIndicator({ id: targetId, after });
-  };
   const reorderStop = (sourceId, targetId, after) =>
     updateDay(day.id, (value) => {
       const items = reorderScheduleItems(value.items, sourceId, targetId, after);
       if (items === value.items) return value;
       return { ...value, items };
     });
-  const finishDrag = () => {
-    const { sourceId, targetId, after } = dragState.current;
-    if (sourceId && targetId) reorderStop(sourceId, targetId, after);
-    resetDrag();
-  };
-  const beginDesktopDrag = (event, sourceId) => {
-    dragState.current = { sourceId, targetId: null, after: false };
-    setDraggingStopId(sourceId);
-    event.dataTransfer.effectAllowed = "move";
-    event.dataTransfer.setData("text/plain", sourceId);
-  };
-  const updateDropTarget = (row, pointerY, targetId) => {
-    const bounds = row.getBoundingClientRect();
-    setDropTarget(targetId, pointerY >= bounds.top + bounds.height / 2);
-  };
-  const beginPointerDrag = (event, sourceId) => {
-    if (event.pointerType === "mouse") return;
-    event.preventDefault();
-    event.currentTarget.setPointerCapture(event.pointerId);
-    dragState.current = { sourceId, targetId: null, after: false };
-    setDraggingStopId(sourceId);
-  };
-  const continuePointerDrag = (event) => {
-    if (!dragState.current.sourceId || event.pointerType === "mouse") return;
-    event.preventDefault();
-    if (event.clientY < 72) window.scrollBy({ top: -12 });
-    if (event.clientY > window.innerHeight - 72) window.scrollBy({ top: 12 });
-    const row = document.elementFromPoint(event.clientX, event.clientY)?.closest(".stop-editor");
-    if (row?.dataset.stopId) updateDropTarget(row, event.clientY, row.dataset.stopId);
-  };
   const reorderWithKeyboard = (event, itemId) => {
     if (event.key !== "ArrowUp" && event.key !== "ArrowDown") return;
     event.preventDefault();
@@ -1870,95 +1825,70 @@ function DayEditor({ day, index, updateDay }) {
         </div>
       </div>
       <div id={editorId} hidden={isCollapsed}>
-        <div className="stop-editor-list">
-          {day.items.map((item, itemIndex) => (
-            <div
-              className={`stop-editor ${draggingStopId === item.id ? "dragging" : ""} ${dropIndicator?.id === item.id ? (dropIndicator.after ? "drop-after" : "drop-before") : ""}`}
-              key={item.id}
-              data-stop-id={item.id}
-              onDragOver={(event) => {
-                if (!dragState.current.sourceId) return;
-                event.preventDefault();
-                event.dataTransfer.dropEffect = "move";
-                updateDropTarget(event.currentTarget, event.clientY, item.id);
-              }}
-              onDrop={(event) => {
-                event.preventDefault();
-                finishDrag();
-              }}
-            >
-            <button
-              type="button"
-              className="stop-drag-handle"
-              draggable
-              onDragStart={(event) => beginDesktopDrag(event, item.id)}
-              onDragEnd={resetDrag}
-              onPointerDown={(event) => beginPointerDrag(event, item.id)}
-              onPointerMove={continuePointerDrag}
-              onPointerUp={(event) => {
-                if (event.pointerType !== "mouse" && dragState.current.sourceId) finishDrag();
-              }}
-              onPointerCancel={resetDrag}
-              onKeyDown={(event) => reorderWithKeyboard(event, item.id)}
-              aria-label={`Move place ${itemIndex + 1}. Drag to reorder, or use the up and down arrow keys.`}
-              title="Drag to reorder"
-            >
-              <span className="stop-drag-grip" aria-hidden="true">⠿</span>
-              <span className="stop-number" aria-hidden="true">
-                {String(itemIndex + 1).padStart(2, "0")}
-              </span>
-            </button>
-            <label>
-              PLACE
-              <input
-                value={item.place}
-                onChange={(e) => updateStop(item.id, { place: e.target.value })}
-                placeholder="Senso-ji Temple"
-              />
-            </label>
-            <label>
-              TIME
-              <input
-                type="time"
-                value={item.time}
-                onChange={(e) => updateStop(item.id, { time: e.target.value })}
-              />
-            </label>
-            <label>
-              DURATION
-              <input
-                value={item.duration}
-                onChange={(e) =>
-                  updateStop(item.id, { duration: e.target.value })
-                }
-                placeholder="1 hr"
-              />
-            </label>
-            <label className="address-field">
-              ADDRESS
-              <input
-                value={item.note}
-                onChange={(e) => updateStop(item.id, { note: e.target.value })}
-                placeholder="Street address or map link"
-              />
-            </label>
-            <button
-              type="button"
-              className="remove-stop"
-              onClick={() => removeStop(item.id)}
-              aria-label={`Remove place ${itemIndex + 1}`}
-              title="Remove place"
-            >
-              <span aria-hidden="true">×</span>
-            </button>
+        <DndContext
+          sensors={sensors}
+          collisionDetection={closestCenter}
+          onDragEnd={({ active, over }) => {
+            if (over && active.id !== over.id) {
+              const sourceIndex = day.items.findIndex((item) => item.id === active.id);
+              const targetIndex = day.items.findIndex((item) => item.id === over.id);
+              reorderStop(active.id, over.id, sourceIndex < targetIndex);
+            }
+          }}
+        >
+          <SortableContext items={day.items.map((item) => item.id)} strategy={verticalListSortingStrategy}>
+            <div className="stop-editor-list">
+              {day.items.map((item, itemIndex) => (
+                <SortableStopEditor
+                  key={item.id}
+                  item={item}
+                  itemIndex={itemIndex}
+                  updateStop={updateStop}
+                  removeStop={removeStop}
+                  reorderWithKeyboard={reorderWithKeyboard}
+                />
+              ))}
             </div>
-          ))}
-        </div>
+          </SortableContext>
+        </DndContext>
         <button type="button" className="add-stop" onClick={addStop}>
           ＋ Add another place
         </button>
       </div>
     </article>
+  );
+}
+
+function SortableStopEditor({ item, itemIndex, updateStop, removeStop, reorderWithKeyboard }) {
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
+  const style = {
+    transform: transform ? CSS.Transform.toString({ ...transform, x: 0, scaleX: 1, scaleY: 1 }) : undefined,
+    transition,
+    zIndex: isDragging ? 2 : undefined,
+  };
+  return (
+    <div ref={setNodeRef} className={`stop-editor${isDragging ? " dragging" : ""}`} style={style}>
+      <div className="stop-position">
+        <button
+          type="button"
+          ref={setActivatorNodeRef}
+          className="stop-drag-handle"
+          {...attributes}
+          {...listeners}
+          onKeyDown={(event) => reorderWithKeyboard(event, item.id)}
+          aria-label={`Move place ${itemIndex + 1}. Drag to reorder, or use the up and down arrow keys.`}
+          title="Drag to reorder"
+        >
+          <span className="stop-drag-grip" aria-hidden="true">⠿</span>
+        </button>
+        <span className="stop-number" aria-hidden="true">{String(itemIndex + 1).padStart(2, "0")}</span>
+      </div>
+      <label>PLACE<input value={item.place} onChange={(event) => updateStop(item.id, { place: event.target.value })} placeholder="Senso-ji Temple" /></label>
+      <label>TIME<input type="time" value={item.time} onChange={(event) => updateStop(item.id, { time: event.target.value })} /></label>
+      <label>DURATION<input value={item.duration} onChange={(event) => updateStop(item.id, { duration: event.target.value })} placeholder="1 hr" /></label>
+      <label className="address-field">ADDRESS<input value={item.note} onChange={(event) => updateStop(item.id, { note: event.target.value })} placeholder="Street address or map link" /></label>
+      <button type="button" className="remove-stop" onClick={() => removeStop(item.id)} aria-label={`Remove place ${itemIndex + 1}`} title="Remove place"><span aria-hidden="true">×</span></button>
+    </div>
   );
 }
 
