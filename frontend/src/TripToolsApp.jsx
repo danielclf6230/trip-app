@@ -1774,6 +1774,12 @@ function DayEditor({ day, index, updateDay }) {
       ...value,
       items: value.items.filter((item) => item.id !== id),
     }));
+  const cleanDay = () => {
+    if (!day.items.length) return;
+    const date = prettyDate(day.date, { weekday: true });
+    if (!window.confirm(`Remove all ${day.items.length} places from ${date}?`)) return;
+    updateDay(day.id, (value) => ({ ...value, items: [] }));
+  };
   const reorderStop = (sourceId, targetId, after) =>
     updateDay(day.id, (value) => {
       const items = reorderScheduleItems(value.items, sourceId, targetId, after);
@@ -1851,9 +1857,14 @@ function DayEditor({ day, index, updateDay }) {
             </div>
           </SortableContext>
         </DndContext>
-        <button type="button" className="add-stop" onClick={addStop}>
-          ＋ Add another place
-        </button>
+        <div className="day-stop-actions">
+          <button type="button" className="add-stop" onClick={addStop}>
+            ＋ Add another place
+          </button>
+          <button type="button" className="clean-day" onClick={cleanDay} disabled={!day.items.length} aria-label={`Clean all places from ${prettyDate(day.date, { weekday: true })}`}>
+            Clean
+          </button>
+        </div>
       </div>
     </article>
   );

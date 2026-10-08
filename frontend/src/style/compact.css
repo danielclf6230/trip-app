@@ -24,9 +24,16 @@
 .stop-drag-grip{font-size:18px;line-height:1}
 .stop-position .stop-number{align-self:center;font-size:11px;line-height:1.1}
 .stop-editor.dragging{background:#f1ece3;box-shadow:0 8px 22px #173f4826}
+.day-stop-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:10px 18px}
+.day-stop-actions .add-stop{margin:0}
+.clean-day{margin-left:auto;padding:7px;border:0;background:transparent;color:#a15a50;font-size:12px;font-weight:700}
+.clean-day:hover:not(:disabled){color:var(--red)}
+.clean-day:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+.clean-day:disabled{color:#b9bcb6;cursor:default}
 
 @media(max-width:760px){
   .stop-editor{grid-template-columns:48px minmax(0,1fr) minmax(0,1fr) 26px}
   .stop-position{grid-row:1/4;gap:4px}
   .stop-drag-handle{min-height:40px}
+  .day-stop-actions{padding:10px 12px}
 }
