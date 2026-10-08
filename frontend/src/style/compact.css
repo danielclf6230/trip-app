@@ -14,3 +14,18 @@
   .day-badge{width:44px;height:44px}
   .day-head h3{font-size:16px}
 }
+
+/* Schedule stop reordering. */
+.stop-editor{position:relative;transition:opacity .15s,background-color .15s,box-shadow .15s}
+.stop-drag-handle{align-self:center;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;width:36px;min-height:48px;padding:2px 0;border:0;background:transparent;color:#927f68;cursor:grab;touch-action:none;-webkit-user-select:none;user-select:none;-webkit-user-drag:element}
+.stop-drag-handle:active{cursor:grabbing}
+.stop-drag-handle:focus-visible{outline:2px solid var(--red);outline-offset:2px}
+.stop-drag-grip{height:13px;color:#9da9a5;font-size:16px;line-height:13px;letter-spacing:-2px}
+.stop-drag-handle .stop-number{align-self:auto;font-size:11px;line-height:1.1}
+.stop-editor.dragging{opacity:.42;background:#efe8dd}
+.stop-editor.drop-before{box-shadow:inset 0 3px 0 var(--red)}
+.stop-editor.drop-after{box-shadow:inset 0 -3px 0 var(--red)}
+
+@media(max-width:760px){
+  .stop-drag-handle{grid-row:1/4;width:30px;min-height:58px}
+}
