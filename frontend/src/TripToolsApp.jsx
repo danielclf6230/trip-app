@@ -1871,6 +1871,12 @@ function DayEditor({ day, index, updateDay }) {
 }
 
 function SortableStopEditor({ item, itemIndex, updateStop, removeStop, reorderWithKeyboard }) {
+  const notesDialog = useRef(null);
+  const [draftNote, setDraftNote] = useState("");
+  const openNotes = () => {
+    setDraftNote(item.note || "");
+    notesDialog.current.showModal();
+  };
   const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({ id: item.id });
   const style = {
     transform: transform ? CSS.Transform.toString({ ...transform, x: 0, scaleX: 1, scaleY: 1 }) : undefined,
@@ -1878,6 +1884,7 @@ function SortableStopEditor({ item, itemIndex, updateStop, removeStop, reorderWi
     zIndex: isDragging ? 2 : undefined,
   };
   return (
+    <>
     <div ref={setNodeRef} className={`stop-editor${isDragging ? " dragging" : ""}`} style={style}>
       <div className="stop-position">
         <button
@@ -1897,9 +1904,28 @@ function SortableStopEditor({ item, itemIndex, updateStop, removeStop, reorderWi
       <label>PLACE<input value={item.place} onChange={(event) => updateStop(item.id, { place: event.target.value })} placeholder="Senso-ji Temple" /></label>
       <label>TIME<input type="time" value={item.time} onChange={(event) => updateStop(item.id, { time: event.target.value })} /></label>
       <label>DURATION<input value={item.duration} onChange={(event) => updateStop(item.id, { duration: event.target.value })} placeholder="1 hr" /></label>
-      <label className="address-field">ADDRESS<input value={item.note} onChange={(event) => updateStop(item.id, { note: event.target.value })} placeholder="Street address or map link" /></label>
+      <div className="address-field stop-notes-field">
+        <span>NOTES</span>
+        <button type="button" className="stop-notes-preview" onClick={openNotes} aria-haspopup="dialog" aria-label={`Edit notes for ${item.place || `place ${itemIndex + 1}`}`}>
+          {item.note || "Add address, transport, or notes…"}
+        </button>
+      </div>
       <button type="button" className="remove-stop" onClick={() => removeStop(item.id)} aria-label={`Remove place ${itemIndex + 1}`} title="Remove place"><span aria-hidden="true">×</span></button>
     </div>
+    <dialog ref={notesDialog} className="stop-notes-dialog" aria-labelledby={`stop-notes-title-${item.id}`} onClick={(event) => { if (event.target === event.currentTarget) notesDialog.current.close(); }}>
+      <header>
+        <h3 id={`stop-notes-title-${item.id}`}>Notes</h3>
+        <button type="button" onClick={() => notesDialog.current.close()} aria-label="Close notes">&#215;</button>
+      </header>
+      <p>{item.place || `Place ${itemIndex + 1}`}</p>
+      <label htmlFor={`stop-notes-input-${item.id}`}>Address, transport, and other details</label>
+      <textarea id={`stop-notes-input-${item.id}`} autoFocus rows={8} value={draftNote} onChange={(event) => setDraftNote(event.target.value)} placeholder={"Address or map link\nTransport and directions\nBooking details or reminders"} />
+      <footer>
+        <button type="button" className="outline-btn" onClick={() => notesDialog.current.close()}>Cancel</button>
+        <button type="button" className="primary-btn" onClick={() => { updateStop(item.id, { note: draftNote }); notesDialog.current.close(); }}>Save notes</button>
+      </footer>
+    </dialog>
+    </>
   );
 }
 

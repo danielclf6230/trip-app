@@ -190,3 +190,18 @@
 .schedule-import-dialog textarea{resize:none;overflow:hidden}
 .import-stop>span{min-width:0;overflow-wrap:anywhere}
 @media(max-width:600px){.schedule-import-dialog{max-height:calc(100dvh - 24px)}}
+.stop-notes-field{min-width:0;font-size:9px;font-weight:700;letter-spacing:.1em;color:#5b6a67}
+.stop-notes-preview{display:block;width:100%;margin-top:3px;padding:5px 2px;border:0;border-bottom:1px solid #ccc2b4;background:transparent;color:#172f32;text-align:left;font-size:13px;line-height:1.25;font-weight:500;letter-spacing:normal;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.stop-notes-preview:hover,.stop-notes-preview:focus-visible{border-color:var(--red)}
+.stop-notes-dialog{width:min(480px,calc(100vw - 32px));max-height:calc(100dvh - 32px);overflow:auto;padding:24px;border:7px double #d7cbbb;background:var(--paper);color:var(--ink);box-shadow:0 28px 75px #0005}
+.stop-notes-dialog::backdrop{background:#12292bbb;backdrop-filter:blur(4px)}
+.stop-notes-dialog header{display:flex;align-items:center;justify-content:space-between;gap:16px}
+.stop-notes-dialog h3{margin:0;font:700 24px 'Noto Serif JP',serif}
+.stop-notes-dialog header button{border:0;background:transparent;color:var(--ink);font-size:26px;padding:4px 8px}
+.stop-notes-dialog p{margin:8px 0 20px;overflow-wrap:anywhere;color:#6b7e7c;font-size:13px}
+.stop-notes-dialog label{display:block;font-size:12px;margin-bottom:8px}
+.stop-notes-dialog textarea{display:block;width:100%;min-height:180px;max-height:50dvh;resize:vertical;padding:12px;border:1px solid #ccc2b4;background:#fffdf9;color:var(--ink);font-size:16px;line-height:1.6}
+.stop-notes-dialog textarea:focus{outline:2px solid var(--ink);outline-offset:2px}
+.stop-notes-dialog footer{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
+.timeline-stop small{white-space:pre-wrap;overflow-wrap:anywhere}
+@media(max-width:760px){.stop-notes-field{font-size:9px}.stop-notes-preview{font-size:14px}}
