@@ -2,6 +2,8 @@
 node_modules/
 
 # env files
+/backend/env
+/frontend/env
 *.key
 *.jks
 *.keystore

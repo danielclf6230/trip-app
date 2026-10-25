@@ -1,1 +1,11 @@
-null
+{
+  "version": "1.0.6",
+  "notes": "Fix the Manage Users and Groups screen overlapping phone status icons.",
+  "pub_date": "2026-10-25T04:14:14.613Z",
+  "platforms": {
+    "darwin-aarch64": {
+      "s3Key": "releases/1.0.6/Trip-Tools.app.tar.gz",
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUN25sZ3luUTJMZFc2Mm1SSEw4YVlMZjNNbzczOWV5dmFzTzBUK25aeHJnVmlHRlliNFhLQngvejI1Yy94WTZ0U0N0L21qV1hiZG5BQ1F0ekZxdVVucWdkaXZSdEZGOUFJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkyOTAxMTQ4CWZpbGU6VHJpcCBUb29scy5hcHAudGFyLmd6CXZlcnNpb246MS4wLjYKV0FPRmh4aG83OEtnRExoSXJkQlM1SDc1cEpzY0ZZUmRGYnBCdkdRNUw5SElGVC9PanV6bHMxQkdnbEJ2bzgxR0pkSFI0QnkxbzdObVhxR2xEbUl2QWc9PQo="
+    }
+  }
+}

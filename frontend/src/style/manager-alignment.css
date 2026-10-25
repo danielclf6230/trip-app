@@ -27,6 +27,22 @@ button.owner-group-heading{width:100%;border:0;background:transparent;text-align
 .manager-modal,.manager-modal>header{border-radius:0}.manager-content{background-image:linear-gradient(rgba(23,63,72,.025) 1px,transparent 1px);background-size:100% 28px}.manager-section-title{padding-bottom:8px;border-bottom:1px solid #cfc4b5}.manager-section-title strong{width:24px;height:24px;border:1px solid #cbbfaf;border-radius:0;background:transparent}.owner-group-sections{gap:12px}.owner-group-section{padding:12px 14px;border:1px solid #d8cebf;border-left:3px solid var(--ink);border-radius:0;background:rgba(255,253,248,.55);box-shadow:none}.owner-group-heading{margin:0;padding:0!important;border:0}.owner-group-heading i,.managed-identity i{border-radius:0;background:var(--ink)}.owner-group-heading>b em{width:24px;height:24px;margin-left:9px;border:1px solid #bfc8c4;border-radius:0;background:transparent;font-size:13px}.group-dropzone{border-radius:0;box-shadow:none}.user-hierarchy{gap:0;border-bottom:1px solid #d9d0c3}.owner-user-section{border:0}.managed-user{min-height:58px;margin:0;padding:10px 8px;border:0;border-top:1px solid #ddd3c6;border-radius:0;background:transparent;box-shadow:none}.managed-user:hover{border-color:#ddd3c6;background:rgba(255,255,255,.42);box-shadow:none}.invited-users{gap:0;margin-top:0;border-left:1px solid #cbbfaf}.invited-user-row{background:rgba(239,230,216,.24)}.reset-password-btn{height:31px;padding:0 13px;border:1px solid var(--ink);border-radius:0;background:transparent;color:var(--ink);letter-spacing:.06em}.reset-password-btn:hover{background:var(--ink);color:#fff}.delete-user{width:32px;height:31px;min-height:31px;border:1px solid #d6aaa2;border-radius:0;background:transparent}.delete-user:hover{background:var(--red)}.delete-user:hover svg{fill:#fff}.collapse-users-btn{width:26px;height:26px;border:1px solid #bfc8c4;border-radius:0;background:transparent}.directory-toggle strong:after{content:''}.reset-modal{border:1px solid #c9bcaa;border-left:4px solid var(--red);box-shadow:12px 12px 0 rgba(23,63,72,.15)}
 @media(max-width:600px){.manager-content{padding:15px 13px}.owner-group-section{padding:11px}.managed-user{padding:10px 5px}.managed-identity i{width:32px;height:32px;flex-basis:32px}.reset-password-btn{height:29px;padding:0 9px;font-size:8px}.delete-user{width:29px;height:29px;min-height:29px}.collapse-users-btn{top:13px;right:6px}.owner-user-line>.managed-user{padding-right:42px}}
 
+/* Fixed dialogs sit outside the body's iPhone safe-area padding. */
+.manager-overlay {
+  --manager-gap: 22px;
+  padding: calc(var(--manager-gap) + env(safe-area-inset-top, 0px))
+    calc(var(--manager-gap) + env(safe-area-inset-right, 0px))
+    calc(var(--manager-gap) + env(safe-area-inset-bottom, 0px))
+    calc(var(--manager-gap) + env(safe-area-inset-left, 0px));
+}
+.manager-modal {
+  max-height: calc(100vh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 2 * var(--manager-gap));
+  max-height: calc(100dvh - env(safe-area-inset-top, 0px) - env(safe-area-inset-bottom, 0px) - 2 * var(--manager-gap));
+}
+@media (max-width: 600px) {
+  .manager-overlay { --manager-gap: 12px; }
+}
+
 .managed-user{cursor:pointer!important;transition:background .15s,border-color .15s}.managed-user.selected-user{position:relative;background:#edf2ef;box-shadow:inset 3px 0 var(--red)}.managed-user.selected-user:after{content:'SELECTED';position:absolute;right:8px;bottom:3px;color:var(--red);font-size:6px;font-weight:800;letter-spacing:.14em}.group-dropzone{cursor:pointer}.group-dropzone:hover{border-color:#81928d}.drag-help{min-height:18px}.selected-user .managed-actions{margin-right:42px}
 @media(max-width:600px){.drag-help{position:static;margin:0 0 12px;padding:8px 10px;background:var(--ink);color:#fff}.managed-user.selected-user:after{right:5px}.selected-user .managed-actions{margin-right:35px}.group-dropzone:active{border-color:var(--red);background:#fff4ee}}
 
