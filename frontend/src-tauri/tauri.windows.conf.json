@@ -8,7 +8,7 @@
   },
   "plugins": {
     "updater": {
-      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDc1OEIwRDlEMzI1ODlFRkIKUldUN25sZ3luUTJMZFoxY3RIT0J5U3BzejNwaGloRVM4R0FLRDd0T0h2aUYzSDYxa2NObStObHcK",
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDk4MzdDNEYyQzNCNEI1RUEKUldUcXRiVEQ4c1EzbUduRXlLMSt1aWRiZk9VdUdwUWpsQ05XakgrQUlJcDllekVLajFzN1JZVnQK",
       "endpoints": [
         "https://tools-backend-v3um.onrender.com/desktop-updates/latest.json?target={{target}}&arch={{arch}}"
       ],
