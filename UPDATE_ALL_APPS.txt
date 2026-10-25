@@ -1,0 +1,12 @@
+COPY THE REQUEST BELOW AND PASTE IT INTO THE CODEX CHAT WHEN YOU WANT TO RELEASE AN UPDATE.
+This is a chat request, not a Terminal or PowerShell command.
+
+Please prepare and build a new Trip Tools release for Windows, macOS, and Android APK. Do the work, rather than only giving me instructions.
+
+1. Check the current project, release instructions, and available build tools. Increase the app version by one patch number (for example, 1.0.4 to 1.0.5), using the same new version in frontend/src-tauri/tauri.conf.json, frontend/src-tauri/Cargo.toml, and the app entry in Cargo.lock. Keep that one version across all three platforms.
+2. Run the relevant checks and fix build errors. Preserve the application identifiers, existing desktop updater signing key, and original Android release signing key. Never generate replacement signing keys or print private keys/passwords.
+3. Build the Mac application and DMG on macOS, the Windows NSIS installer on Windows, and the release-signed Android APK using its existing signing setup. Use any already configured build machines or CI available to this project. Do not substitute a debug APK for the release APK.
+4. Prepare the matching desktop updater artifacts/signatures and the desktop and Android update manifests. If update hosting and deployment access are already configured, upload the release files and publish the manifests so older installed apps can show Update available. Publish only the platforms whose builds succeeded, and never advertise an older installer as the new version.
+5. Verify the release outputs. Tell me the new version, the exact installer locations or download links, which platforms actually built successfully, and whether the update is live.
+
+If a required build machine, signing key, account, or download/deployment setup is unavailable, complete the independent work you can and tell me exactly what is missing. Do not claim an application was built or an update was published unless it really succeeded. Pushing source code alone does not build or publish the applications. Do not include iPhone in this release.

@@ -351,6 +351,7 @@ export default function TripToolsApp() {
           setTrip(prepared);
           setCanInvite(selected.canInvite);
           setView("trip");
+          setSaveState("Saved");
         } else {
           localStorage.setItem(storageKey, "list");
           setView("list");
@@ -615,7 +616,10 @@ export default function TripToolsApp() {
           </div>
         </div>
         <div className="header-actions">
-          <AppUpdater canInstall={saveState === "Saved" || saveState === "Trips ready"} />
+          <AppUpdater canInstall={view === "list" || (
+            saveState !== "Loading…" && saveState !== "Saving…"
+            && tripsAreEqual(trip, syncedTrip.current)
+          )} />
           <span
             className={`save-state ${saveState !== "Saved" ? "working" : ""}`}
           >

@@ -135,7 +135,7 @@ For later updates, increase the app version, build and upload a new iOS archive,
 
 ## Android APK update button
 
-Version 1.0.4 adds an **Updates** control to the header and login screen on Android. It checks the Render backend and opens the release APK in the system browser. The user downloads the file, opens it, and approves installation. Android may ask them to allow installations from that browser. The button does not silently install applications.
+The Android app checks the Render backend automatically on launch, every 15 minutes while visible, and when returning to the app or reconnecting (at most once per minute). An **Update available** control appears in the header and on the login screen only when a newer APK version is found. It stays hidden when the installed version is current, no release is published, or a background check fails. Clicking it opens the release APK in the system browser. The user downloads the file, opens it, and approves installation. Android may ask them to allow installations from that browser. The button does not silently install applications.
 
 1. Increase the version in both Tauri configuration and Cargo.toml.
 2. Build using `npm run android:build:release` on the Windows machine that holds the existing release keystore. The application ID, signing key, and increasing version code must be preserved. Do not distribute the `.debug` APK as an update to the release app.
