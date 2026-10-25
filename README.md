@@ -21,6 +21,15 @@ Notes:
 - Trip access is controlled by `trip_tools_members`. Invitation codes are single-use and expire after seven days.
 - New standalone trip owners are created by an administrator. Invited companions register from the login page.
 
+Render availability and login:
+
+- `Keep Render Alive` checks both apps every five minutes, at minutes 3, 8, 13, and so on (UTC): Trip Tools at `https://tools-backend-v3um.onrender.com/health` and Coupleapp at `https://couplebackend.onrender.com/`. Each runs as an independent matrix job, so a failure in one does not cancel the other. Both retry network/HTTP failures. Trip Tools must report application and database readiness; Coupleapp must return its existing `✅ API is running` health response (which does not verify its database). The obsolete `daily-costs-app` service is no longer used.
+- Run this repository's workflow manually from GitHub Actions to check both apps together. Coupleapp's separate keep-alive workflow is also enabled; this combined workflow covers both apps independently of that separate schedule.
+- The login screen starts waking the backend as soon as it opens. Submission shares that readiness check, waits up to two minutes for a cold start, then sends the login or registration request once. Invalid credentials and rate limits are shown without automatically retrying credentials. A connection failure lets the user try again.
+- GitHub schedules run from the default branch and [can be delayed or dropped](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows#schedule). In public repositories, schedules are disabled after 60 days without activity; re-enable the workflow in Actions if needed. Keep-alive reduces cold starts but cannot guarantee immediate login.
+- [Render Free services](https://render.com/docs/free) sleep after 15 idle minutes and share 750 free instance hours per workspace each month. Keeping several services awake can exhaust that allowance. A suspended service cannot be restored by pinging it.
+- Commit and push these changes to `main`, let the web frontend deploy, and run **Keep Render Alive** manually to check the new workflow. Installed mobile/desktop apps need a new build/update to receive the login changes; see the platform guides. The Windows release workflow now runs all frontend regression tests before building its signed installer.
+
 Database separation and shopping photos:
 
 - Run `npm run migrate:tooldb` from `backend` to move existing `trip_users` and `trip_tools_*` tables together into `tooldb`, create `trip_tools_photos`, and update the local `.env`. The migration refuses to overwrite an occupied target schema. MySQL DDL is not transactional; the table move uses one atomic `RENAME TABLE` statement.

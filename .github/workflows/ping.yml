@@ -2,12 +2,59 @@ name: Keep Render Alive
 
 on:
   schedule:
-    - cron: "*/10 * * * *" # Every 5 minutes UTC
+    - cron: "3-58/5 * * * *" # Every 5 minutes UTC, away from the top of the hour.
   workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: render-keep-alive
+  cancel-in-progress: false
 
 jobs:
   ping:
+    name: Keep ${{ matrix.app }} alive
     runs-on: ubuntu-latest
+    timeout-minutes: 6
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - app: Trip Tools
+            health-url: https://tools-backend-v3um.onrender.com/health
+            health-format: trip-json
+          - app: Coupleapp
+            health-url: https://couplebackend.onrender.com/
+            health-format: couple-text
+    env:
+      APP_NAME: ${{ matrix.app }}
+      RENDER_HEALTH_URL: ${{ matrix.health-url }}
+      HEALTH_FORMAT: ${{ matrix.health-format }}
     steps:
-      - name: Curl to Render
-        run: curl -s https://daily-costs-app.onrender.com
+      - name: Wake service and validate health response
+        shell: bash
+        run: |
+          set -euo pipefail
+          health_file="${RUNNER_TEMP}/render-health.json"
+          curl --fail-with-body --silent --show-error --location \
+            --connect-timeout 10 --max-time 60 \
+            --retry 4 --retry-delay 5 --retry-max-time 240 --retry-all-errors \
+            --header 'Cache-Control: no-cache' \
+            --output "$health_file" "$RENDER_HEALTH_URL"
+          python3 - "$health_file" "$HEALTH_FORMAT" <<'PY'
+          import json, sys
+          with open(sys.argv[1]) as response:
+              body = response.read()
+          if sys.argv[2] == "trip-json":
+              health = json.loads(body)
+              if health.get("ok") is not True or health.get("db") is not True:
+                  sys.exit("Trip Tools health check failed: application or database is unavailable.")
+          elif sys.argv[2] == "couple-text":
+              if body.strip() != "✅ API is running":
+                  sys.exit("Coupleapp health check failed: unexpected API response.")
+          else:
+              sys.exit("Unknown health response format.")
+          PY
+          echo "${APP_NAME} health check passed."
+          echo "${APP_NAME} health check passed: ${RENDER_HEALTH_URL}" >> "$GITHUB_STEP_SUMMARY"

@@ -1,18 +1,22 @@
+import { createServerReadiness } from "./serverReadiness.js";
+
 const productionBase = "https://tools-backend-v3um.onrender.com";
-const developmentBase = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
-const base = (import.meta.env.PROD ? productionBase : developmentBase).replace(/\/$/, "");
+const env = import.meta.env || {};
+const base = (env.VITE_API_BASE_URL || (env.PROD ? productionBase : "http://localhost:3000")).replace(/\/$/, "");
+export const ensureServerReady = createServerReadiness(base);
 
 function getToken() {
   try { return JSON.parse(localStorage.getItem("user"))?.token ?? null; }
   catch { return null; }
 }
 
-async function request(path, { method = "GET", body } = {}) {
+async function request(path, { method = "GET", body, timeoutMs } = {}) {
   const token = getToken();
   const response = await fetch(`${base}${path}`, {
     method,
     headers: { ...(body instanceof FormData ? {} : { "Content-Type": "application/json" }), ...(token ? { Authorization: `Bearer ${token}` } : {}) },
     body: body === undefined ? undefined : body instanceof FormData ? body : JSON.stringify(body),
+    ...(timeoutMs ? { signal: AbortSignal.timeout(timeoutMs) } : {}),
   });
   const raw = await response.text();
   let data = {};
@@ -26,12 +30,27 @@ async function request(path, { method = "GET", body } = {}) {
   return data;
 }
 
+async function authenticate(path, body) {
+  await ensureServerReady();
+  let user;
+  try {
+    user = await request(path, { method: "POST", body, timeoutMs: 30000 });
+  } catch (error) {
+    if (error.status) throw error;
+    throw new Error("Could not connect to the server. Check your connection and try again.");
+  }
+  if (typeof user?.token !== "string" || !user.token) {
+    throw new Error("The server returned an unexpected sign-in response. Please try again.");
+  }
+  return user;
+}
+
 export function login(name, password) {
-  return request("/api/auth/login", { method: "POST", body: { name, password } });
+  return authenticate("/api/auth/login", { name, password });
 }
 
 export function register(name, password, inviteCode = "") {
-  return request("/api/auth/register", { method: "POST", body: { name, password, inviteCode: inviteCode || undefined } });
+  return authenticate("/api/auth/register", { name, password, inviteCode: inviteCode || undefined });
 }
 
 export function changePassword(currentPassword, newPassword, confirmPassword) {

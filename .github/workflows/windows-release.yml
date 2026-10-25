@@ -62,7 +62,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
           node frontend/scripts/windows-cloud-release.mjs validate
           if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
-          node --test frontend/scripts/windows-cloud-release.test.mjs
+          npm test --prefix frontend
           exit $LASTEXITCODE
 
       - name: Verify existing Windows updater signing key
