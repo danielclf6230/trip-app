@@ -1,0 +1,10 @@
+{
+  "$schema": "../gen/schemas/mobile-schema.json",
+  "identifier": "android-updates",
+  "description": "Open HTTPS APK download links in the Android browser.",
+  "windows": ["main"],
+  "platforms": ["android"],
+  "permissions": [
+    { "identifier": "opener:allow-open-url", "allow": [{ "url": "https://**" }] }
+  ]
+}

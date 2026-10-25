@@ -13,6 +13,7 @@ import rateLimit from "express-rate-limit";
 import { makePool } from "./db.js";
 import { loginHandler, requireAuth } from "./auth.js";
 import { mergeTripChanges } from "./trip-merge.js";
+import { desktopUpdatesRouter } from "./desktop-updates.js";
 
 if (!process.env.JWT_SECRET || process.env.JWT_SECRET.length < 32) {
   throw new Error("JWT_SECRET must be configured with at least 32 characters.");
@@ -28,6 +29,7 @@ const allowedOrigins = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
   "http://tauri.localhost",
+  "tauri://localhost",
   "https://trip-pepfij0v3-danielclf6230s-projects.vercel.app",
   "https://trip-app-tool.vercel.app",
 ].filter(Boolean);
@@ -42,6 +44,8 @@ app.use(
     credentials: true,
   }),
 );
+
+app.use("/desktop-updates", desktopUpdatesRouter());
 
 const pool = makePool();
 

@@ -1,4 +1,5 @@
 import ScheduleImport from "./ScheduleImport";
+import AppUpdater from "./AppUpdater";
 import { replaceImportedStops } from "./scheduleCsv";
 import { reorderScheduleItems } from "./scheduleOrder";
 import { DndContext, PointerSensor, closestCenter, useSensor, useSensors } from "@dnd-kit/core";
@@ -614,6 +615,7 @@ export default function TripToolsApp() {
           </div>
         </div>
         <div className="header-actions">
+          <AppUpdater canInstall={saveState === "Saved" || saveState === "Trips ready"} />
           <span
             className={`save-state ${saveState !== "Saved" ? "working" : ""}`}
           >

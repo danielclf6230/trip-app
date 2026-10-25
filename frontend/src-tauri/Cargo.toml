@@ -1,6 +1,6 @@
 [package]
 name = "trip-tools"
-version = "1.0.3"
+version = "1.0.4"
 description = "Private trip planning and expense tools"
 authors = ["Daniel Chow"]
 license = ""
@@ -23,3 +23,10 @@ serde = { version = "1.0", features = ["derive"] }
 log = "0.4"
 tauri = { version = "2.12.0", features = [] }
 tauri-plugin-log = "2"
+
+[target.'cfg(any(target_os = "windows", target_os = "macos"))'.dependencies]
+tauri-plugin-updater = "2"
+tauri-plugin-process = "2"
+
+[target.'cfg(target_os = "android")'.dependencies]
+tauri-plugin-opener = "2"

@@ -1,0 +1,72 @@
+.app-update-control { position: relative; flex: 0 0 auto; }
+.app-update-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  min-height: 34px;
+  padding: 6px 13px 6px 7px;
+  border: 1px solid #c9bcaa;
+  border-radius: 999px;
+  background: var(--paper, #faf7f0);
+  color: var(--ink, #173f48);
+  font: 700 11px 'DM Sans', sans-serif;
+  white-space: nowrap;
+  box-shadow: 0 2px 0 rgba(23, 63, 72, .04);
+  transition: background .18s, border-color .18s, box-shadow .18s;
+}
+.app-update-icon {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: rgba(223, 73, 56, .09);
+  color: var(--red, #df4938);
+}
+.app-update-icon svg { width: 14px; height: 14px; }
+.app-update-button:hover:not(:disabled) {
+  background: #fffdf8;
+  border-color: var(--ink, #173f48);
+  box-shadow: 0 3px 9px rgba(23, 63, 72, .08);
+}
+.app-update-button:focus-visible, .app-update-dismiss:focus-visible {
+  outline: 2px solid var(--red, #df4938);
+  outline-offset: 3px;
+}
+.app-update-button:disabled { cursor: progress; opacity: .75; }
+.app-update-feedback {
+  position: absolute;
+  z-index: 50;
+  top: calc(100% + 12px);
+  right: 0;
+  width: min(290px, calc(100vw - 32px));
+  padding: 17px 35px 17px 18px;
+  border: 1px solid var(--line, #d9d0c2);
+  border-top: 3px solid var(--red, #df4938);
+  background: #fffdf8;
+  color: var(--ink, #173f48);
+  box-shadow: 5px 6px 0 rgba(23, 63, 72, .07), 0 10px 28px rgba(23, 63, 72, .08);
+}
+.app-update-feedback-label { color: var(--red, #df4938); font-size: 8px; font-weight: 700; letter-spacing: .16em; }
+.app-update-feedback p { margin: 7px 0 0; font-size: 12px; line-height: 1.6; }
+.app-update-dismiss { position: absolute; top: 9px; right: 7px; width: 26px; height: 26px; padding: 0; border: 0; background: transparent; color: #748080; font-size: 20px; }
+.app-update-dismiss:hover { color: var(--red, #df4938); }
+.app-update-icon.is-spinning svg { animation: app-update-spin 1.2s linear infinite; }
+.login-page { position: relative; }
+.login-update-control { position: absolute; z-index: 5; top: 20px; right: 20px; }
+.profile-update-actions { display: flex; align-items: center; gap: 12px; }
+@keyframes app-update-spin { to { transform: rotate(360deg); } }
+@media (max-width: 760px) {
+  .app-update-button { min-height: 34px; gap: 4px; padding: 5px 8px 5px 5px; font-size: 9px; }
+  .app-update-icon { width: 19px; height: 19px; }
+  .header-actions .app-update-button { width: 34px; padding: 5px; }
+  .header-actions .app-update-button > span:last-child { display: none; }
+  .header-actions .app-update-feedback { position: fixed; top: calc(76px + env(safe-area-inset-top, 0px)); right: 12px; }
+  .login-update-control { top: 12px; right: 12px; }
+  .profile-update-actions { gap: 6px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .app-update-icon.is-spinning svg { animation: none; }
+  .app-update-button { transition: none; }
+}

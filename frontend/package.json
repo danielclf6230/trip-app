@@ -20,7 +20,8 @@
     "ios:dev": "tauri ios dev",
     "ios:build": "tauri ios build",
     "lint": "eslint . --ext js,jsx --report-unused-disable-directives --max-warnings 0",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "desktop:update:manifest": "node scripts/create-desktop-update.mjs"
   },
   "engines": {
     "node": ">=22.12.0"
@@ -29,14 +30,18 @@
     "@dnd-kit/core": "^6.3.1",
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
+    "@tauri-apps/api": "^2.12.4",
+    "@tauri-apps/plugin-opener": "^2.7.2",
+    "@tauri-apps/plugin-process": "^2.4.0",
+    "@tauri-apps/plugin-updater": "^2.14.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-router-dom": "^7.18.3"
   },
   "devDependencies": {
+    "@tauri-apps/cli": "^2.12.0",
     "@types/react": "^18.2.43",
     "@types/react-dom": "^18.2.17",
-    "@tauri-apps/cli": "^2.12.0",
     "@vitejs/plugin-react": "^6.1.1",
     "eslint": "^8.55.0",
     "eslint-plugin-react": "^7.33.2",

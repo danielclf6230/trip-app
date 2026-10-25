@@ -84,7 +84,7 @@ Approved users install from Google Play and receive later updates through Google
 
 Apple requires the final iOS build and signing to run on a Mac with Xcode. Also required:
 
-- An Apple Developer Program membership
+- An Apple Developer Program membership for TestFlight or App Store distribution; a free Personal Team is sufficient for installation on your own iPhone
 - Xcode signed into that developer account
 - Node.js, Rust, and CocoaPods on the Mac
 
@@ -131,3 +131,23 @@ For later updates, increase the app version, build and upload a new iOS archive,
 
 - Direct APK: send a newly signed APK with the same application ID/signing key and a higher version code. Opening it updates the installed application.
 - Google Play internal/closed testing: upload a signed AAB with a higher version code. Approved testers receive the update through Google Play.
+
+
+## Android APK update button
+
+Version 1.0.4 adds an **Updates** control to the header and login screen on Android. It checks the Render backend and opens the release APK in the system browser. The user downloads the file, opens it, and approves installation. Android may ask them to allow installations from that browser. The button does not silently install applications.
+
+1. Increase the version in both Tauri configuration and Cargo.toml.
+2. Build using `npm run android:build:release` on the Windows machine that holds the existing release keystore. The application ID, signing key, and increasing version code must be preserved. Do not distribute the `.debug` APK as an update to the release app.
+3. Upload the release-signed ARM64 APK to a stable HTTPS download URL accessible to users.
+4. From `frontend`, generate its manifest:
+
+```bash
+npm run desktop:update:manifest -- --platform android --url https://YOUR-DOWNLOAD-HOST/Trip-Tools-1.0.5.apk --notes "Describe the changes"
+```
+
+5. Commit and deploy `backend/android-update.json` and the update route to Render. A `null` manifest means no release is published. Publish only after testing installation over the previous release on an ARM64 Android phone.
+
+Users need one manual installation of version 1.0.4 (or a later version containing this feature). Future releases can then be found with the button. The APK must remain signed with the original Android key; desktop updater keys are unrelated. The current release build targets ARM64 phones.
+
+The update control is hidden on iPhone. Free Xcode installations still require Mac-based renewal; TestFlight or App Store distribution has its own update process. Apple Developer Program membership is required for those distribution routes, but is not required to install on your own iPhone using Xcode's free Personal Team.

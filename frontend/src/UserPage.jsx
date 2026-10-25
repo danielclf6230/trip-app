@@ -40,7 +40,7 @@ export default function UserPage() {
       <header className="profile-topbar">
         <button className="profile-back" onClick={() => nav("/app")}>← Back to trip</button>
         <div className="brand"><span className="brand-mark">TT</span><div><strong>TRIP TOOLS</strong><small>TRAVELER ACCOUNT</small></div></div>
-        <button className="profile-logout" onClick={() => { logout(); nav("/", { replace: true }); }}>Log out</button>
+        <div className="profile-update-actions"><AppUpdater /><button className="profile-logout" onClick={() => { logout(); nav("/", { replace: true }); }}>Log out</button></div>
       </header>
 
       <section className="profile-layout">
@@ -71,3 +71,4 @@ export default function UserPage() {
     </main>
   );
 }
+import AppUpdater from "./AppUpdater";

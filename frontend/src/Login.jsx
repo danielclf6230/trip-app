@@ -31,6 +31,7 @@ export default function LoginPage() {
 
   return (
     <main className="login-page">
+      <div className="login-update-control"><AppUpdater /></div>
       <section className="login-scene">
         <div className="login-sun" />
         <div className="login-city">TWO</div>
@@ -63,3 +64,4 @@ export default function LoginPage() {
     </main>
   );
 }
+import AppUpdater from "./AppUpdater";
