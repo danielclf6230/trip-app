@@ -1,5 +1,13 @@
 # Android — build on this Mac
 
+## Update all my apps together
+
+Copy and paste this into the chat after finishing your code changes:
+
+```text
+Release my updates for Android, Mac, Windows, and iPhone together from this Mac. Use one shared version, reusing it if already prepared for this release. Use my existing signing keys. Build and verify the Android APK and Apple Silicon Mac installer, upload their update files to S3, and prepare their update manifests. Build and install the iPhone app on my connected phone using my existing Personal Team; keep its bundle identifier and local data. Fix errors and tell me what to push, where the installers are, and which updates are actually live. If a phone, credential, or service is unavailable, finish the independent work and report what is blocked. Run the configured Windows GitHub Actions workflow for that same version, wait for its result, and verify its live update entry. Include the Windows installer link in the report. Do not replace signing keys or claim success without checking.
+```
+
 ## Ask Codex to do it
 
 Copy and paste into this chat:

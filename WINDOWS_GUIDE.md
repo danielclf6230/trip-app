@@ -1,57 +1,32 @@
-# Windows — build on your Windows PC
+# Windows — build from this Mac using GitHub
 
 ## Ask Codex to do it
 
-Open the project in Codex on Windows, then paste:
-
 ```text
-Release the next Windows update using WINDOWS_GUIDE.md. Update the version (reuse it if already prepared), build with my existing updater signing key, upload to S3, prepare the Windows update manifest, and verify the result. Tell me what to push and give me the setup EXE. Preserve same-version Mac entries. If tools or access are missing, say what is blocked. Do not replace signing keys.
+Build and publish the Windows update using the configured windows-release.yml GitHub Actions workflow. Use the shared release version already prepared on main; do not increase it again. Preserve the existing Windows signing key and same-version Mac update entry. Wait for the build, S3 upload, manifest commit, and Render deployment. Verify the live Windows download, give me the installer, and report any failure accurately.
 ```
 
 ## Do it yourself
 
-### Set up a new Windows build PC
+1. Finish your app changes. Prepare the same version in `tauri.conf.json`, `Cargo.toml`, and the app entry in `Cargo.lock`, then commit/push to `main`.
+2. Open [GitHub → Actions → Build and publish Windows update](https://github.com/danielclf6230/trip-app/actions/workflows/windows-release.yml).
+3. Click **Run workflow**, choose **main**, and enter that exact version, for example `1.0.7`.
+4. Wait for success. The workflow builds the EXE on GitHub's Windows machine, uploads it to private S3, commits its update entry, and checks Render.
+5. Download the EXE from the run's **Windows-installer-VERSION** artifact. For existing updater-enabled x64 Windows apps, reopen the app to check for the update.
 
-Install Node.js 22.12 or newer, then run these commands in PowerShell:
-
-```powershell
-winget install --id Microsoft.VisualStudio.2022.BuildTools --exact --source winget --accept-package-agreements --accept-source-agreements --silent --override '--wait --quiet --norestart --add Microsoft.VisualStudio.Workload.VCTools --includeRecommended'
-winget install --id Rustlang.Rustup --exact --source winget --accept-package-agreements --accept-source-agreements --silent --override '-y --default-host x86_64-pc-windows-msvc --profile minimal'
-```
-
-Open a new PowerShell window after installation so `cargo` is on PATH. WebView2 must also be installed; it is already present on the personal build PC.
-
-Keep the Windows updater private key at `$HOME\.tauri\trip-tools.key` and make a secure backup outside the repository. On another build PC, transfer this same key rather than generating another one. The `.pub` file alone cannot sign releases.
-
-Windows version **1.0.5** uses a replacement updater key created on the personal build PC. Existing Windows installations signed with the previous key must run this version's setup EXE manually once before receiving future automatic updates. The Mac updater key is separate and remains unchanged.
-
-### Build the installer
-
-1. Get the latest project changes. For a new release, increase the version in `frontend/src-tauri/tauri.conf.json` and `frontend/src-tauri/Cargo.toml` to the same number. Reuse it if already prepared.
-2. Open PowerShell in your project's **`frontend`** folder:
-
-   ```powershell
-   npm ci
-   $env:TAURI_SIGNING_PRIVATE_KEY = Join-Path $HOME '.tauri\trip-tools.key'
-   $env:TAURI_SIGNING_PRIVATE_KEY_PASSWORD = ''
-   npm run desktop:build
-   explorer.exe .\src-tauri\target\release\bundle\nsis
-   ```
-
-3. Run the new **setup EXE** to update the app. The command requires the Windows updater key matching `frontend/src-tauri/tauri.windows.conf.json` at `$HOME\.tauri\trip-tools.key` and the Windows build tools installed.
+No Windows PC is needed for future builds. The shared Mac entry is preserved when it uses the same release version. If the workflow fails, send Codex the run link; uploaded files alone do not mean the update is live.
 
 <details>
-<summary>Publish it so users see “Update available”</summary>
+<summary>One-time Actions secrets / recovery</summary>
 
-From the same PowerShell, with AWS CLI and your `trip-tools-release` profile available:
+Repository **Settings → Secrets and variables → Actions**:
 
-```powershell
-$releaseVersion = (Get-Content .\src-tauri\tauri.conf.json -Raw | ConvertFrom-Json).version
-$installer = Get-ChildItem .\src-tauri\target\release\bundle\nsis\*.exe | Sort-Object LastWriteTime -Descending | Select-Object -First 1
-aws s3 cp $installer.FullName "s3://trip-tools-daniel-2026/releases/$releaseVersion/Trip-Tools-setup.exe" --profile trip-tools-release --region us-east-2
-npm run desktop:update:manifest -- --platform windows-x86_64 --s3-key "releases/$releaseVersion/Trip-Tools-setup.exe" --signature "$($installer.FullName).sig" --notes "App improvements"
-```
+- `WINDOWS_UPDATER_PRIVATE_KEY`: the original Windows updater private key matching Windows 1.0.5. This differs from the Mac key.
+- `WINDOWS_UPDATER_KEY_PASSWORD`: only needed if that private key has a password; the current key uses an empty password.
+- `RELEASE_AWS_ACCESS_KEY_ID` and `RELEASE_AWS_SECRET_ACCESS_KEY`: credentials allowed to upload/read `trip-tools-daniel-2026/releases/*`.
 
-Commit/push the version files, `Cargo.lock`, and `backend/desktop-updates.json`. Wait for Render to show **Live**. Older updater-enabled x64 Windows apps can then offer the update.
+Keep secure backups of the original Windows key. Do not put keys or passwords in Git. The workflow uses its built-in GitHub token to commit the manifest; if branch protection blocks that push, the run fails rather than forcing an overwrite. Render must auto-deploy commits on main, or you must deploy its manifest commit manually.
+
+The updater signature is separate from Windows publisher code signing. If an older installed app cannot show its confirmation/download controls, install the new EXE manually once to receive the corrected updater.
 
 </details>

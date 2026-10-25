@@ -1,5 +1,5 @@
 {
-  "version": "1.0.6",
-  "s3Key": "releases/1.0.6/Trip-Tools.apk",
-  "notes": "Fix the Manage Users and Groups screen overlapping phone status icons."
+  "version": "1.0.7",
+  "s3Key": "releases/1.0.7/Trip-Tools.apk",
+  "notes": "Show an explicit Download APK button when an update is available."
 }

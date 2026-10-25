@@ -13,6 +13,7 @@ export default function AppUpdater({ canInstall = true }) {
   const [busy, setBusy] = useState(false);
   const [installed, setInstalled] = useState(false);
   const [message, setMessage] = useState("");
+  const [confirmation, setConfirmation] = useState(null);
   const running = useRef(false);
   const statusId = useId();
 
@@ -64,7 +65,7 @@ export default function AppUpdater({ canInstall = true }) {
     };
   }, []);
 
-  async function updateApp() {
+  async function updateApp(confirmedVersion = null) {
     if (running.current) return;
     running.current = true;
     setBusy(true);
@@ -85,28 +86,34 @@ export default function AppUpdater({ canInstall = true }) {
         if (!release) {
           setAvailableVersion("");
           setMessage("");
+          setConfirmation(null);
           return;
         }
         setAvailableVersion(release.version);
         setMessage(`Version ${release.version} is available.`);
-        if (window.confirm(`Download Trip Tools ${release.version}?\n\n${release.notes || "A new version is available."}\n\nYour browser will download the APK. Open it and approve installation to update the app.`)) {
-          await openUrl(release.url);
-          setMessage("Open the downloaded APK and tap Install to finish updating.");
+        if (confirmedVersion !== release.version) {
+          setConfirmation({ version: release.version, notes: release.notes });
+          return;
         }
+        setConfirmation(null);
+        await openUrl(release.url);
+        setMessage("Open the downloaded APK and tap Install to finish updating.");
         return;
       }
       update = await check({ timeout: 30000 });
       if (!update) {
         setAvailableVersion("");
         setMessage("");
+        setConfirmation(null);
         return;
       }
       setAvailableVersion(update.version);
       setMessage(`Version ${update.version} is available.`);
-      const accepted = window.confirm(
-        `Install Trip Tools ${update.version}?\n\n${update.body || "A new version is available."}\n\nSave your changes before continuing. The app will close and restart during installation.`,
-      );
-      if (!accepted) return;
+      if (confirmedVersion !== update.version) {
+        setConfirmation({ version: update.version, notes: update.body });
+        return;
+      }
+      setConfirmation(null);
       let downloaded = 0;
       let total = 0;
       setMessage("Downloading update…");
@@ -137,10 +144,10 @@ export default function AppUpdater({ canInstall = true }) {
   }
 
   if ((platform !== "desktop" && platform !== "android")
-    || (!availableVersion && !installed && !busy)) return null;
+    || (!availableVersion && !installed && !busy && !confirmation)) return null;
   return (
     <div className="app-update-control">
-      <button className="app-update-button" type="button" onClick={updateApp} disabled={busy}
+      <button className="app-update-button" type="button" onClick={() => updateApp()} disabled={busy}
         aria-label={installed ? "Restart to finish updating Trip Tools" : `Update Trip Tools to version ${availableVersion}`}
         aria-describedby={message ? statusId : undefined} aria-busy={busy}
         title={installed ? "Restart to finish updating" : `Version ${availableVersion} is available`}>
@@ -155,7 +162,19 @@ export default function AppUpdater({ canInstall = true }) {
       {message && <div className="app-update-feedback" id={statusId} role="status" aria-live="polite">
         <span className="app-update-feedback-label">APP UPDATES</span>
         <p>{message}</p>
-        {!busy && <button type="button" className="app-update-dismiss" onClick={() => setMessage("")} aria-label="Dismiss update message">×</button>}
+        {confirmation && !busy && <>
+          {confirmation.notes && <p className="app-update-notes">{confirmation.notes}</p>}
+          <p className="app-update-hint">{platform === "android"
+            ? "Download the APK, then open it and approve installation."
+            : "Save your changes first. The app will restart after installation."}</p>
+          <div className="app-update-actions">
+            <button type="button" className="app-update-install" onClick={() => updateApp(confirmation.version)}>
+              {platform === "android" ? "Download APK" : "Download & install"}
+            </button>
+            <button type="button" className="app-update-later" onClick={() => { setConfirmation(null); setMessage(""); }}>Not now</button>
+          </div>
+        </>}
+        {!busy && <button type="button" className="app-update-dismiss" onClick={() => { setConfirmation(null); setMessage(""); }} aria-label="Dismiss update message">×</button>}
       </div>}
     </div>
   );

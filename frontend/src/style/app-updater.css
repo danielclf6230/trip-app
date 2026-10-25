@@ -50,6 +50,14 @@
 }
 .app-update-feedback-label { color: var(--red, #df4938); font-size: 8px; font-weight: 700; letter-spacing: .16em; }
 .app-update-feedback p { margin: 7px 0 0; font-size: 12px; line-height: 1.6; }
+.app-update-feedback .app-update-notes { max-height: 120px; overflow: auto; white-space: pre-wrap; overflow-wrap: anywhere; }
+.app-update-feedback .app-update-hint { color: #748080; font-size: 11px; }
+.app-update-actions { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 15px; }
+.app-update-actions button { min-height: 40px; padding: 9px 12px; border-radius: 8px; font: 700 11px 'DM Sans', sans-serif; cursor: pointer; }
+.app-update-install { border: 1px solid var(--ink, #173f48); background: var(--ink, #173f48); color: #fff; }
+.app-update-install:hover { background: #245965; }
+.app-update-later { border: 1px solid var(--line, #d9d0c2); background: transparent; color: var(--ink, #173f48); }
+.app-update-actions button:focus-visible { outline: 2px solid var(--red, #df4938); outline-offset: 3px; }
 .app-update-dismiss { position: absolute; top: 9px; right: 7px; width: 26px; height: 26px; padding: 0; border: 0; background: transparent; color: #748080; font-size: 20px; }
 .app-update-dismiss:hover { color: var(--red, #df4938); }
 .app-update-icon.is-spinning svg { animation: app-update-spin 1.2s linear infinite; }

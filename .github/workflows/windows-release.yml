@@ -1,0 +1,122 @@
+name: Build and publish Windows update
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Version already prepared on main, for example 1.0.7"
+        required: true
+        type: string
+
+permissions:
+  contents: write
+
+concurrency:
+  group: windows-release
+  cancel-in-progress: false
+
+jobs:
+  windows:
+    if: github.ref == 'refs/heads/main'
+    runs-on: windows-latest
+    timeout-minutes: 60
+    defaults:
+      run:
+        shell: pwsh
+    env:
+      EXPECTED_VERSION: ${{ inputs.version }}
+      AWS_REGION: us-east-2
+      S3_BUCKET: trip-tools-daniel-2026
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.sha }}
+          fetch-depth: 0
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+          cache-dependency-path: |
+            frontend/package-lock.json
+            backend/package-lock.json
+
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: x86_64-pc-windows-msvc
+
+      - name: Check required secrets
+        env:
+          WINDOWS_KEY: ${{ secrets.WINDOWS_UPDATER_PRIVATE_KEY }}
+          AWS_KEY: ${{ secrets.RELEASE_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET: ${{ secrets.RELEASE_AWS_SECRET_ACCESS_KEY }}
+        run: |
+          if (!$env:WINDOWS_KEY) { throw 'Add WINDOWS_UPDATER_PRIVATE_KEY in repository Actions secrets.' }
+          if (!$env:AWS_KEY -or !$env:AWS_SECRET) { throw 'Add RELEASE_AWS_ACCESS_KEY_ID and RELEASE_AWS_SECRET_ACCESS_KEY.' }
+
+      - name: Install dependencies and validate release version
+        run: |
+          npm ci --prefix frontend
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          npm ci --prefix backend --ignore-scripts
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node frontend/scripts/windows-cloud-release.mjs validate
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          node --test frontend/scripts/windows-cloud-release.test.mjs
+          exit $LASTEXITCODE
+
+      - name: Verify existing Windows updater signing key
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.WINDOWS_UPDATER_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.WINDOWS_UPDATER_KEY_PASSWORD }}
+        run: node frontend/scripts/windows-cloud-release.mjs verify-key
+
+      - name: Build the signed x64 Windows installer
+        working-directory: frontend
+        env:
+          TAURI_SIGNING_PRIVATE_KEY: ${{ secrets.WINDOWS_UPDATER_PRIVATE_KEY }}
+          TAURI_SIGNING_PRIVATE_KEY_PASSWORD: ${{ secrets.WINDOWS_UPDATER_KEY_PASSWORD }}
+        run: npm run desktop:build -- --target x86_64-pc-windows-msvc -- --locked
+
+      - name: Verify installer and its update signature
+        run: node frontend/scripts/windows-cloud-release.mjs prepare
+
+      - name: Save downloadable installer
+        uses: actions/upload-artifact@v4
+        with:
+          name: Windows-installer-${{ inputs.version }}
+          if-no-files-found: error
+          path: |
+            frontend/src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe
+            frontend/src-tauri/target/x86_64-pc-windows-msvc/release/bundle/nsis/*.exe.sig
+
+      - name: Upload installer to private S3 and verify download
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.RELEASE_AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.RELEASE_AWS_SECRET_ACCESS_KEY }}
+        run: node frontend/scripts/windows-cloud-release.mjs upload
+
+      - name: Publish Windows update manifest
+        run: |
+          git fetch origin main
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git merge --ff-only origin/main
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          # Do not publish a build if app source changed while it was building.
+          git diff --quiet $env:GITHUB_SHA HEAD -- frontend
+          if ($LASTEXITCODE -ne 0) { throw 'App source changed during this build. Run the workflow again.' }
+          node frontend/scripts/windows-cloud-release.mjs manifest
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add backend/desktop-updates.json
+          git diff --cached --quiet
+          if ($LASTEXITCODE -eq 1) {
+            git commit -m "Publish Windows $env:EXPECTED_VERSION update"
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+            git push origin HEAD:main
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          } elseif ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+
+      - name: Wait for Render and verify the live Windows update
+        run: node frontend/scripts/windows-cloud-release.mjs verify-live
