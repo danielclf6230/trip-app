@@ -27,8 +27,8 @@
 .shopping-composer button:hover{background:var(--red)}
 .shopping-composer:focus-within{border-color:#a99a85;box-shadow:7px 8px 0 #e3d2c5}
 
-.login-page{display:grid;place-items:stretch;grid-template-columns:minmax(0,1.15fr) minmax(430px,.85fr);min-height:100vh;min-height:100dvh;padding:0;background:#f7f1e7}
-.login-scene{position:relative;min-width:0;min-height:100vh;min-height:100dvh;overflow:hidden;background-color:#173f48;background-image:linear-gradient(155deg,#173f48 0%,#1f5660 62%,#14363c 100%);color:#fff}
+.login-page{display:grid;place-items:stretch;grid-template-columns:minmax(0,1.15fr) minmax(430px,.85fr);min-height:calc(100vh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));min-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));padding:0;background:#f7f1e7}
+.login-scene{position:relative;min-width:0;min-height:calc(100vh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));min-height:calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px));overflow:hidden;background-color:#173f48;background-image:linear-gradient(155deg,#173f48 0%,#1f5660 62%,#14363c 100%);color:#fff}
 .login-scene:before{content:'';position:absolute;left:-8%;right:-8%;bottom:-7%;height:42%;background:#0d2e34;clip-path:polygon(0 61%,9% 50%,17% 66%,26% 37%,35% 63%,46% 48%,55% 67%,63% 30%,72% 62%,82% 42%,91% 65%,100% 48%,100% 100%,0 100%)}
 .login-scene:after{content:'';position:absolute;inset:0;background:linear-gradient(rgba(255,255,255,.04) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.035) 1px,transparent 1px);background-size:48px 48px;mask-image:linear-gradient(to bottom,black,transparent 72%)}
 .login-sun{position:absolute;width:310px;height:310px;border-radius:50%;right:8%;top:10%;background:#e05240;box-shadow:0 0 0 25px rgba(224,82,64,.06)}
@@ -205,3 +205,27 @@
 .stop-notes-dialog footer{display:flex;justify-content:flex-end;gap:10px;margin-top:18px}
 .timeline-stop small{white-space:pre-wrap;overflow-wrap:anywhere}
 @media(max-width:760px){.stop-notes-field{font-size:9px}.stop-notes-preview{font-size:14px}}
+
+/* Fit the sign-in form within the phone's usable screen, including safe areas. */
+@media (max-width: 900px) {
+  .login-scene { min-height: 128px; }
+  .login-sun { width: 125px; height: 125px; right: 5%; top: -14px; }
+  .login-scene-copy { left: 24px; right: 24px; bottom: 20px; }
+  .login-scene-copy h2 { font-size: 24px; line-height: 1.2; margin: 8px 0 0; }
+  .login-scene-copy > span { font-size: 8px; }
+  .login-panel { width: min(440px, 100%); padding: 22px 24px; }
+  .login-panel h1 { margin: 0 0 6px; font-size: 30px; line-height: 1.25; }
+  .login-intro { font-size: 13px; line-height: 1.5; margin-bottom: 18px; }
+  .auth-tabs { margin-bottom: 16px; }
+  .login-form { gap: 12px; }
+  .login-form input { min-height: 48px; margin-top: 6px; padding: 12px 14px; font-size: 16px; }
+  .login-submit { min-height: 48px; }
+  .login-secure { margin-top: 14px; line-height: 1.5; }
+}
+
+/* Smaller screens and the on-screen keyboard need the space used by the banner. */
+@media (max-width: 900px) and (max-height: 740px) {
+  .login-page { grid-template-rows: 1fr; }
+  .login-scene { display: none; }
+  .login-panel { padding-block: 20px; }
+}
