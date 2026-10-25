@@ -1,7 +1,14 @@
 import test from "node:test";
 import assert from "node:assert/strict";
 import { generateKeyPairSync, randomBytes, createHash, sign } from "node:crypto";
-import { verifyUpdaterSignature, mergeWindowsRelease } from "./windows-cloud-release.mjs";
+import { verifyUpdaterSignature, mergeWindowsRelease, cargoAppVersions } from "./windows-cloud-release.mjs";
+
+test("version validation accepts Windows CRLF and Unix LF checkouts", () => {
+  const cargo = '[package]\nname = "trip-tools"\nversion = "1.0.7"\n';
+  const lock = '[[package]]\nname = "trip-tools"\nversion = "1.0.7"\n';
+  assert.deepEqual(cargoAppVersions(cargo, lock), { cargo: "1.0.7", lock: "1.0.7" });
+  assert.deepEqual(cargoAppVersions(cargo.replaceAll("\n", "\r\n"), lock.replaceAll("\n", "\r\n")), { cargo: "1.0.7", lock: "1.0.7" });
+});
 
 function signedFixture(version = "1.0.7") {
   const pair = generateKeyPairSync("ed25519");

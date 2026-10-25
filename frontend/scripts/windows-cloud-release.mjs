@@ -10,6 +10,13 @@ const statePath = join(root, "frontend/src-tauri/target/windows-cloud-release.js
 const manifestPath = join(root, "backend/desktop-updates.json");
 const loadJson = async path => JSON.parse(await readFile(path, "utf8"));
 
+export function cargoAppVersions(cargo, lock) {
+  return {
+    cargo: cargo.replace(/\r\n/g, "\n").match(/\[package\][\s\S]*?\nversion = "([^"]+)"/)?.[1],
+    lock: lock.replace(/\r\n/g, "\n").match(/name = "trip-tools"\nversion = "([^"]+)"/)?.[1],
+  };
+}
+
 export function verifyUpdaterSignature(bytes, encodedSignature, encodedPublicKey, version) {
   const publicLines = Buffer.from(encodedPublicKey.trim(), "base64").toString("utf8").trim().split(/\r?\n/);
   const lines = Buffer.from(encodedSignature.trim(), "base64").toString("utf8").trim().split(/\r?\n/);
@@ -55,9 +62,8 @@ async function configuration() {
   }
   const cargo = await readFile(join(root, "frontend/src-tauri/Cargo.toml"), "utf8");
   const lock = await readFile(join(root, "frontend/src-tauri/Cargo.lock"), "utf8");
-  const cargoVersion = cargo.match(/\[package\][\s\S]*?\nversion = "([^"]+)"/)?.[1];
-  const lockVersion = lock.match(/name = "trip-tools"\nversion = "([^"]+)"/)?.[1];
-  if (cargoVersion !== config.version || lockVersion !== config.version) throw new Error("JSON, TOML, and Cargo.lock app versions must match.");
+  const versions = cargoAppVersions(cargo, lock);
+  if (versions.cargo !== config.version || versions.lock !== config.version) throw new Error("JSON, TOML, and Cargo.lock app versions must match.");
   const windows = await loadJson(join(root, "frontend/src-tauri/tauri.windows.conf.json"));
   return { version: config.version, publicKey: windows.plugins.updater.pubkey };
 }
