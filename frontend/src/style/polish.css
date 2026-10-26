@@ -287,10 +287,10 @@
   .login-secure { margin-top: 10px; }
 }
 @media (min-width: 901px) { .login-scene { min-height: inherit; } }
-.login-form > .login-submit { margin-top: 10px; }
+.login-form > .login-submit { margin-top: 24px; }
 @media (max-width: 900px) {
-  .login-panel { align-self: start; padding-top: 16px; padding-bottom: 28px; }
+  .login-panel { align-self: start; padding-top: 32px; padding-bottom: 28px; }
 }
 @media (max-width: 900px) and (max-height: 620px) {
-  .login-panel { padding-top: 12px; padding-bottom: 16px; }
+  .login-panel { padding-top: 24px; padding-bottom: 16px; }
 }
