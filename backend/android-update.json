@@ -1,5 +1,5 @@
 {
-  "version": "1.0.9",
-  "s3Key": "releases/1.0.9/Trip-Tools.apk",
-  "notes": "Keep GO visible while the picker spins. Compact Travel party controls and a cleaner wheel."
+  "version": "1.0.10",
+  "s3Key": "releases/1.0.10/Trip-Tools.apk",
+  "notes": "Remember your login for 30 days. Show the installed app version. Keep GO visible while the picker spins."
 }
