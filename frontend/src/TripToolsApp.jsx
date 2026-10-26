@@ -2069,80 +2069,93 @@ function Wheel({
         text="Add everyone, spin the wheel, and let fate choose the generous one."
       />
       <div className="wheel-layout">
-        <div className="wheel-wrap">
-          <span className="pointer">▼</span>
-          <div
-            className="wheel"
-            style={{
-              background: gradient,
-              transform: `rotate(${rotation}deg)`,
-            }}
-          >
-            <div className="wheel-center">GO</div>
+        <div className={`wheel-wrap${spinning ? " is-spinning" : ""}`} aria-busy={spinning}>
+          <span className="pointer" aria-hidden="true">▼</span>
+          <div className="wheel-disc">
+            <div
+              className="wheel"
+              style={{
+                background: gradient,
+                transform: `rotate(${rotation}deg)`,
+              }}
+            >
+            </div>
           </div>
+          <button type="button" className="wheel-center" onClick={spin}
+            disabled={trip.travelers.length < 2 || spinning}
+            aria-label={spinning ? "Wheel spinning" : "Spin the wheel"}>
+            {spinning ? "…" : "GO"}
+          </button>
+          <span className="wheel-spin-status" role="status">
+            {spinning ? "Picking your lucky traveler…" : trip.travelers.length < 2
+              ? "Open Travel party and add at least two travelers" : "Tap GO to spin"}
+          </span>
         </div>
         <div className="player-panel">
-          <h3>
-            Travel party <span>{segments.length}</span>
-          </h3>
-          <small className="wheel-parts-summary">
-            {trip.travelers.length} {trip.travelers.length === 1 ? "traveler" : "travelers"} · {segments.length} wheel {segments.length === 1 ? "part" : "parts"}
-          </small>
-          <form className="person-add" onSubmit={add}>
-            <input
-              value={newTraveler}
-              onChange={(e) => setNewTraveler(e.target.value)}
-              placeholder="Traveler name"
-            />
-            <button>＋</button>
-          </form>
-          <div className="people">
-            {trip.travelers.map((person, i) => (
-              <div key={person.id}>
-                <i style={{ background: colors[i % colors.length] }} />
-                <span className="traveler-name">{person.name}</span>
-                <label className="parts-control">
-                  <span>PARTS</span>
-                  <input
-                    type="number"
-                    min="1"
-                    max={MAX_WHEEL_PARTS}
-                    value={wheelPartCount(person)}
-                    onChange={(event) => {
-                      const parts = Math.min(
-                        MAX_WHEEL_PARTS,
-                        Math.max(1, Number(event.target.value) || 1),
-                      );
-                      setTrip((current) => ({
-                        ...current,
-                        travelers: current.travelers.map((traveler) =>
-                          traveler.id === person.id ? { ...traveler, parts } : traveler,
-                        ),
-                      }));
-                    }}
-                    aria-label={`Wheel parts for ${person.name}`}
-                  />
-                </label>
-                <button
-                  onClick={() =>
-                    setTrip((current) => ({
-                      ...current,
-                      travelers: current.travelers.filter(
-                        (p) => p.id !== person.id,
-                      ),
-                      wheelResults: Object.fromEntries(
-                        Object.entries(current.wheelResults || {}).filter(
-                          ([travelerId]) => travelerId !== person.id,
-                        ),
-                      ),
-                    }))
-                  }
-                >
-                  ×
-                </button>
+          <details className="travel-party">
+            <summary>Travel party <span>{trip.travelers.length}</span><span className="travel-party-toggle" aria-hidden="true"><svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"><path d="m5 7.5 5 5 5-5" /></svg></span></summary>
+            <fieldset className="travel-party-fields" disabled={spinning}>
+              <small className="wheel-parts-summary">
+                {trip.travelers.length} {trip.travelers.length === 1 ? "traveler" : "travelers"} · {segments.length} wheel {segments.length === 1 ? "part" : "parts"}
+              </small>
+              <form className="person-add" onSubmit={add}>
+                <input
+                  value={newTraveler}
+                  onChange={(e) => setNewTraveler(e.target.value)}
+                  placeholder="Traveler name"
+                  aria-label="Traveler name"
+                />
+                <button aria-label="Add traveler">＋</button>
+              </form>
+              <div className="people">
+                {trip.travelers.map((person, i) => (
+                  <div key={person.id}>
+                    <i style={{ background: colors[i % colors.length] }} />
+                    <span className="traveler-name">{person.name}</span>
+                    <label className="parts-control">
+                      <span>PARTS</span>
+                      <input
+                        type="number"
+                        min="1"
+                        max={MAX_WHEEL_PARTS}
+                        value={wheelPartCount(person)}
+                        onChange={(event) => {
+                          const parts = Math.min(
+                            MAX_WHEEL_PARTS,
+                            Math.max(1, Number(event.target.value) || 1),
+                          );
+                          setTrip((current) => ({
+                            ...current,
+                            travelers: current.travelers.map((traveler) =>
+                              traveler.id === person.id ? { ...traveler, parts } : traveler,
+                            ),
+                          }));
+                        }}
+                        aria-label={`Wheel parts for ${person.name}`}
+                      />
+                    </label>
+                    <button
+                      onClick={() =>
+                        setTrip((current) => ({
+                          ...current,
+                          travelers: current.travelers.filter(
+                            (p) => p.id !== person.id,
+                          ),
+                          wheelResults: Object.fromEntries(
+                            Object.entries(current.wheelResults || {}).filter(
+                              ([travelerId]) => travelerId !== person.id,
+                            ),
+                          ),
+                        }))
+                      }
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
               </div>
-            ))}
-          </div>
+            </fieldset>
+          </details>
           <div className="wheel-results">
             <div className="wheel-results-heading">
               <div>
@@ -2151,7 +2164,7 @@ function Wheel({
               </div>
               <button
                 type="button"
-                disabled={!totalResults}
+                disabled={!totalResults || spinning}
                 onClick={() => setTrip((current) => ({ ...current, wheelResults: {} }))}
               >
                 Reset
@@ -2167,18 +2180,6 @@ function Wheel({
               ))}
             </div>
           </div>
-          <button
-            className="spin-button"
-            disabled={trip.travelers.length < 2 || spinning}
-            onClick={spin}
-          >
-            {spinning ? "SPINNING…" : "SPIN THE WHEEL"}
-          </button>
-          <small className="wheel-hint">
-            {trip.travelers.length < 2
-              ? "Add at least two travelers to spin"
-              : "More parts give a traveler a higher chance of being selected"}
-          </small>
         </div>
       </div>
       {winner && (

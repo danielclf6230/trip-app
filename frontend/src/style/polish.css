@@ -229,3 +229,45 @@
   .login-scene { display: none; }
   .login-panel { padding-block: 20px; }
 }
+
+/* Keep the picker ready to play; traveler setup stays tucked away. */
+.wheel-layout { align-items: start; overflow-anchor: none; }
+.wheel-layout > .player-panel { align-self: start; margin-block: 0; }
+.wheel-wrap { align-self: start; margin-top: 0; margin-bottom: 32px; }
+.wheel-wrap > .wheel-center {
+  border: 3px solid #e7d9c5;
+  padding: 0;
+  cursor: pointer;
+  touch-action: manipulation;
+  transition: box-shadow .2s, background .2s, scale .2s;
+}
+.wheel-wrap > .wheel-center:hover:not(:disabled) {
+  background: #fff;
+  scale: 1.08;
+  box-shadow: 0 0 0 8px rgba(255,250,241,.25), 0 5px 20px rgba(0,0,0,.2);
+}
+.wheel-wrap > .wheel-center:active:not(:disabled) { scale: .95; }
+.wheel-wrap > .wheel-center:focus-visible { outline: 3px solid var(--ink); outline-offset: 5px; }
+.wheel-wrap > .wheel-center:disabled { cursor: not-allowed; color: #8b887e; }
+.wheel-wrap.is-spinning > .wheel-center { animation: wheel-go-pulse 1s ease-in-out infinite; }
+.wheel-wrap.is-spinning > .pointer { animation: wheel-pointer-tick .16s ease-in-out infinite alternate; transform-origin: center top; }
+.wheel-spin-status { position: absolute; top: calc(100% + 14px); left: 0; width: 100%; text-align: center; color: #65716b; font-size: 12px; }
+.travel-party { border: 1px solid var(--line); background: #fffdf8; }
+.travel-party > summary { display: flex; align-items: center; gap: 8px; min-height: 40px; padding: 8px 12px; cursor: pointer; list-style: none; color: var(--ink); font: 700 14px 'Noto Serif JP'; }
+.travel-party > summary::-webkit-details-marker { display: none; }
+.travel-party > summary > span:first-of-type { display: grid; place-items: center; min-width: 20px; height: 20px; border-radius: 50%; background: #e9e0d4; font: 700 10px 'DM Sans'; }
+.travel-party-toggle { display: grid; place-items: center; flex: 0 0 20px; width: 20px; height: 20px; margin-left: auto; }
+.travel-party-toggle svg { display: block; width: 14px; height: 14px; transition: transform .2s; }
+.travel-party[open] .travel-party-toggle svg { transform: rotate(180deg); }
+.travel-party-fields { min-width: 0; margin: 0; padding: 12px 16px 16px; border: 0; border-top: 1px solid var(--line); }
+.travel-party-fields .wheel-parts-summary { margin: 0 0 12px; }
+.travel-party-fields:disabled { opacity: .65; }
+.wheel-result-list { max-height: 320px; overflow-y: auto; }
+@keyframes wheel-go-pulse { 50% { box-shadow: 0 0 0 10px rgba(255,250,241,.3), 0 3px 14px rgba(0,0,0,.16); } }
+@keyframes wheel-pointer-tick { to { transform: rotate(-12deg); } }
+@media (prefers-reduced-motion: reduce) {
+  .wheel-wrap.is-spinning > .wheel-center, .wheel-wrap.is-spinning > .pointer { animation: none; }
+  .wheel { transition-timing-function: linear; }
+}
+.wheel-disc { width: 100%; height: 100%; overflow: hidden; border-radius: 50%; }
+.wheel { overflow: hidden; }
