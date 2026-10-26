@@ -1,6 +1,6 @@
 [package]
 name = "trip-tools"
-version = "1.0.10"
+version = "1.0.11"
 description = "Private trip planning and expense tools"
 authors = ["Daniel Chow"]
 license = ""

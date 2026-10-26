@@ -77,8 +77,8 @@ export default function LoginPage() {
           <label>TRAVELER NAME<input name="username" value={name} onChange={(event) => setName(event.target.value)} autoComplete="username" placeholder="Username" required /></label>
           <label>PASSWORD<input name="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete={mode === "login" ? "current-password" : "new-password"} placeholder="Enter your password" type="password" required />{mode === "register" && <small>At least 6 characters with a letter and a number.</small>}</label>
           {mode === "register" && <label>INVITATION CODE<input value={inviteCode} onChange={(event) => setInviteCode(event.target.value.toUpperCase())} placeholder="8-character code" maxLength={32} required /></label>}
-          {mode === "login" && <label className="login-remember"><input type="checkbox" checked={remember} onChange={(event) => setRemember(event.target.checked)} /><span>Remember me for 30 days</span></label>}
-          <small role="status" aria-live="polite">{connection === "connecting" ? "Connecting to the server… If it is asleep, this can take up to two minutes." : connection === "ready" ? "Server connected." : "Submit the form to try connecting again."}</small>
+          {mode === "login" && <label className="login-remember"><input type="checkbox" checked={remember} onChange={(event) => setRemember(event.target.checked)} /><span>Remember me</span></label>}
+          {connection !== "ready" && <small role="status" aria-live="polite">{connection === "connecting" ? "Connecting to the server… If it is asleep, this can take up to two minutes." : "Submit the form to try connecting again."}</small>}
           {error && <div className="login-error" role="alert">{error}</div>}
           <button className="login-submit" disabled={loading}>{loading ? connection === "connecting" ? "Connecting to server…" : "Opening your trip…" : mode === "login" ? "Enter Trip Tools  →" : "Join shared trip  →"}</button>
         </form>
