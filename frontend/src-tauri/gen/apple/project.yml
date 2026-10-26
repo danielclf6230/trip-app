@@ -56,8 +56,8 @@ targets:
           - UIInterfaceOrientationPortraitUpsideDown
           - UIInterfaceOrientationLandscapeLeft
           - UIInterfaceOrientationLandscapeRight
-        CFBundleShortVersionString: 1.0.8
-        CFBundleVersion: "1.0.8"
+        CFBundleShortVersionString: 1.0.9
+        CFBundleVersion: "1.0.9"
     entitlements:
       path: trip-tools_iOS/trip-tools_iOS.entitlements
     scheme:

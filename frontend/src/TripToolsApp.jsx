@@ -2084,7 +2084,7 @@ function Wheel({
           <button type="button" className="wheel-center" onClick={spin}
             disabled={trip.travelers.length < 2 || spinning}
             aria-label={spinning ? "Wheel spinning" : "Spin the wheel"}>
-            {spinning ? "…" : "GO"}
+            GO
           </button>
           <span className="wheel-spin-status" role="status">
             {spinning ? "Picking your lucky traveler…" : trip.travelers.length < 2
