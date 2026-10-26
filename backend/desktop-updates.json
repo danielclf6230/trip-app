@@ -1,11 +1,11 @@
 {
-  "version": "1.0.8",
-  "notes": "Tap GO to spin the picker. Compact, collapsible Travel party setup and a cleaner wheel.",
-  "pub_date": "2026-10-26T01:20:48.724Z",
+  "version": "1.0.9",
+  "notes": "Keep GO visible while the picker spins. Compact Travel party controls and a cleaner wheel.",
+  "pub_date": "2026-10-26T01:25:42.427Z",
   "platforms": {
     "darwin-aarch64": {
-      "s3Key": "releases/1.0.8/Trip-Tools.app.tar.gz",
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUN25sZ3luUTJMZFgvQnBONDEvVUIxeWphVUJnbGxYeTcxOWd3UTMyQW04c3NlMlhXLzUzUTBIM3NDL0ZOM2hsS1VLaEZzSzJVNzYrWithYWNTT0QvWi9iR3hJZWJCU2dBPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkyOTc3NjIyCWZpbGU6VHJpcCBUb29scy5hcHAudGFyLmd6CXZlcnNpb246MS4wLjgKckxyVmNqMHlxKzk4ekhxTmFwZnE2OUV2MGh3Z2VmTHdQYy91Yk9VeVBmajF1UkhWcCtiNEtzbk00WjlHT1dNc1VOL1lQejBGNm9PYUJCbUhSNktRQkE9PQo="
+      "s3Key": "releases/1.0.9/Trip-Tools.app.tar.gz",
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUN25sZ3luUTJMZGJmbU15c3p0NEZvTlUvK0ZBbFQ5Ymc3R1o2ZS8zcnVNc0gxbyt0YVFHWFUxWnJJVEtVMThYOUV1YjA0RTZiak5xaWNmMFA1dzR6c2YvWVJpaGNvTkFJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkyOTc3OTEyCWZpbGU6VHJpcCBUb29scy5hcHAudGFyLmd6CXZlcnNpb246MS4wLjkKWVg3ODVTRnZBS0J3cGtYQ2c0WEozcmVqQjdNbUZJR0Y1K0NEQ0JlbTdEbE5ncWlGMG54TUFhV3RuWnd4TXppdHg0QlVFR2dNQytpN0tTU0ZqTG1pQVE9PQo="
     }
   }
 }
