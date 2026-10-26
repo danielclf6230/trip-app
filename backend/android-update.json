@@ -1,5 +1,5 @@
 {
-  "version": "1.0.7",
-  "s3Key": "releases/1.0.7/Trip-Tools.apk",
-  "notes": "Show an explicit Download APK button when an update is available."
+  "version": "1.0.8",
+  "s3Key": "releases/1.0.8/Trip-Tools.apk",
+  "notes": "Tap GO to spin the picker. Compact, collapsible Travel party setup and a cleaner wheel."
 }
