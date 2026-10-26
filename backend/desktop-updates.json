@@ -1,15 +1,11 @@
 {
-  "version": "1.0.7",
-  "notes": "Show visible Download & install and Not now buttons in the app updater.",
-  "pub_date": "2026-10-25T04:23:58.488Z",
+  "version": "1.0.8",
+  "notes": "Tap GO to spin the picker. Compact, collapsible Travel party setup and a cleaner wheel.",
+  "pub_date": "2026-10-26T01:20:48.724Z",
   "platforms": {
     "darwin-aarch64": {
-      "s3Key": "releases/1.0.7/Trip-Tools.app.tar.gz",
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUN25sZ3luUTJMZGFnTlZGWFhZbm1jeFpTaDRtU3o5cXJkb1gyUGhCYytGL2VmclFkZ09xMkZQSDVQS0QrbHhpdkRuczFONkFoN294UE5tZDUrUmpTR2RIdW4vU1JIYndJPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkyOTAyMTE0CWZpbGU6VHJpcCBUb29scy5hcHAudGFyLmd6CXZlcnNpb246MS4wLjcKNzdjczhYZkU1TjRseXM5Zis4NmhTbFNjUkl6Uk5aUnhZelhneUNBWE9zNDhYSHhVOWFGOE84UzBISHJnMCtXdjlqYkg3WTg3OENKUGlmUFJxcURKRFE9PQo="
-    },
-    "windows-x86_64": {
-      "s3Key": "releases/1.0.7/Trip-Tools-windows-x86_64-e3a3c8786fa483bea0e4353413b1a8c351d414db4318064ba4ce69fc4fb67e84.exe",
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUcXRiVEQ4c1EzbU5wdGhuQXQ1RU9jRXkwWU8vVGVWaUhZcXBZVTFjMTZCaVYvZFZCZ0RVb1Rudnlkc2JPNkorZGlSTzI1Yi8rZEtzaXlWa2lxSUNyR1plV0FHMzVkR0FjPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkyOTAzMjY4CWZpbGU6VHJpcCBUb29sc18xLjAuN194NjQtc2V0dXAuZXhlCXZlcnNpb246MS4wLjcKSkJYZnRmR2t2eU5GbDdFMFMyc3Z0eXhsbGtYWisyK2F2bWNBQXgzZVlWbVdMTEJCYXRQUFkvQUp6dHNmL21RZ1FIUFgwdkF4TTNKRTJ3M0NjNno5QlE9PQo="
+      "s3Key": "releases/1.0.8/Trip-Tools.app.tar.gz",
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUN25sZ3luUTJMZFgvQnBONDEvVUIxeWphVUJnbGxYeTcxOWd3UTMyQW04c3NlMlhXLzUzUTBIM3NDL0ZOM2hsS1VLaEZzSzJVNzYrWithYWNTT0QvWi9iR3hJZWJCU2dBPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkyOTc3NjIyCWZpbGU6VHJpcCBUb29scy5hcHAudGFyLmd6CXZlcnNpb246MS4wLjgKckxyVmNqMHlxKzk4ekhxTmFwZnE2OUV2MGh3Z2VmTHdQYy91Yk9VeVBmajF1UkhWcCtiNEtzbk00WjlHT1dNc1VOL1lQejBGNm9PYUJCbUhSNktRQkE9PQo="
     }
   }
 }
