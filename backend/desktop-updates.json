@@ -1,11 +1,15 @@
 {
   "version": "1.0.12",
-  "notes": "Trip Tools app improvements",
+  "notes": "Remember me, installed app version, roomier mobile login spacing, and an interactive picker.",
   "pub_date": "2026-10-26T02:02:38.743Z",
   "platforms": {
     "windows-x86_64": {
       "s3Key": "releases/1.0.12/Trip-Tools-windows-x86_64-3bce128fe843a9e23299bd7df49d8e8084fdb33ac776bf3a0f54e808784b5dc6.exe",
       "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUcXRiVEQ4c1EzbU9Gd1lOVFV1OGozYVdJeEI4QlFSeGJwS2UxclRxK3d0N1NPbXVqRjlCZmIwSUZtS1doc2U4VlIwYlhrYUt0dGt0SDBTTlBDS0xvYksxU1RBcU9ObWd3PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkyOTgwMTUzCWZpbGU6VHJpcCBUb29sc18xLjAuMTJfeDY0LXNldHVwLmV4ZQl2ZXJzaW9uOjEuMC4xMgoxMTRTemZmbmZPRmk0ZnZBQmdYRUt1WTJjelNoOWhWNW0yUFQ4RnhudVdIbWt1c01iMHUrd090TldTNUM1TUJJTVVWWkxXK004NnhUeHQyYXJCL3lEUT09Cg=="
+    },
+    "darwin-aarch64": {
+      "s3Key": "releases/1.0.12/Trip-Tools-0bba88a46e3519d3.app.tar.gz",
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUN25sZ3luUTJMZFNocGpvbkJ4NFZYdmJzSEJCakxxSzVpejlrSDhFRmNxSEE2QkZURVlHMFVrTC9EOUprODNXVTU2cG92c3d2REQ1SGlheHhJUTlJcytZQWZWZWtyR1FnPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkyOTc5ODE4CWZpbGU6VHJpcCBUb29scy5hcHAudGFyLmd6CXZlcnNpb246MS4wLjEyCmhUdXR4NzZkSThDWXNvNHJ3UkNaTEpjWTUxZnBtQk5KS3R2VVBYaHFuWkdUb0EvTzRINTBnaXB5SkkxcDN0anRwalFnUXVmN2g0OSszWmNRaFVkakNRPT0K"
     }
   }
 }
