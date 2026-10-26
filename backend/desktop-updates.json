@@ -1,15 +1,11 @@
 {
-  "version": "1.0.10",
-  "notes": "Remember your login for 30 days. Show the installed app version. Keep GO visible while the picker spins.",
-  "pub_date": "2026-10-26T01:38:43.729Z",
+  "version": "1.0.12",
+  "notes": "Trip Tools app improvements",
+  "pub_date": "2026-10-26T02:02:38.743Z",
   "platforms": {
-    "darwin-aarch64": {
-      "s3Key": "releases/1.0.10/Trip-Tools.app.tar.gz",
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUN25sZ3luUTJMZGJZdmRpMVVGODRjRGY4Qk9mRjJyNUtaTFF2Ym9wL0w5MVRaeXZtYWR4UFZZWjMzTzdlV1Bubk0zQ2NzNXNlMDI5WlY4K1VHTFV6TnNaTHlrSlFuUXdBPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkyOTc4NjcwCWZpbGU6VHJpcCBUb29scy5hcHAudGFyLmd6CXZlcnNpb246MS4wLjEwCm5JRUhtRHpYWFhkVzdMSlY0S01ab1NKYXpIQjI5RzVvV0Qwa0RBT2U3cmYzREVtUXpkVEFYTGRZaUloOEZUbmRkTFB5eGhRa2pJV0NFcGZVMlVZRUFnPT0K"
-    },
     "windows-x86_64": {
-      "s3Key": "releases/1.0.10/Trip-Tools-windows-x86_64-1de82e90eb3bd5a1b8dcb0ee940ade37b546b98a969f8c4da5247af5f53ee1f6.exe",
-      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUcXRiVEQ4c1EzbUxEeW1xV01RMzE4SnNsbWxPblJYaVNlY2hFdEVsNGZTUlhVeXhDUjh6ZnRlQlZyaWM1djJua3E2OHpkNGZBOHRGM2Y0NFlaNVZjcDl1WFpRVGI3N0FRPQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkyOTc5MDA4CWZpbGU6VHJpcCBUb29sc18xLjAuMTBfeDY0LXNldHVwLmV4ZQl2ZXJzaW9uOjEuMC4xMAo0Q21VazJ0YkdPV1Z4ZTVMMHNEU1UzMldnSWxqK0l4ek5nQVNiU3c5c2REZFZpa3B3UGhNZkJKK2hQVzBKY09lTVRJNFcrVzdnMitiWCtLRkpLUmFEZz09Cg=="
+      "s3Key": "releases/1.0.12/Trip-Tools-windows-x86_64-3bce128fe843a9e23299bd7df49d8e8084fdb33ac776bf3a0f54e808784b5dc6.exe",
+      "signature": "dW50cnVzdGVkIGNvbW1lbnQ6IHNpZ25hdHVyZSBmcm9tIHRhdXJpIHNlY3JldCBrZXkKUlVUcXRiVEQ4c1EzbU9Gd1lOVFV1OGozYVdJeEI4QlFSeGJwS2UxclRxK3d0N1NPbXVqRjlCZmIwSUZtS1doc2U4VlIwYlhrYUt0dGt0SDBTTlBDS0xvYksxU1RBcU9ObWd3PQp0cnVzdGVkIGNvbW1lbnQ6IHRpbWVzdGFtcDoxNzkyOTgwMTUzCWZpbGU6VHJpcCBUb29sc18xLjAuMTJfeDY0LXNldHVwLmV4ZQl2ZXJzaW9uOjEuMC4xMgoxMTRTemZmbmZPRmk0ZnZBQmdYRUt1WTJjelNoOWhWNW0yUFQ4RnhudVdIbWt1c01iMHUrd090TldTNUM1TUJJTVVWWkxXK004NnhUeHQyYXJCL3lEUT09Cg=="
     }
   }
 }
