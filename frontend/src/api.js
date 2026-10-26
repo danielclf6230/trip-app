@@ -1,3 +1,4 @@
+import { getUser } from "./auth.js";
 import { createServerReadiness } from "./serverReadiness.js";
 
 const productionBase = "https://tools-backend-v3um.onrender.com";
@@ -6,8 +7,7 @@ const base = (env.VITE_API_BASE_URL || (env.PROD ? productionBase : "http://loca
 export const ensureServerReady = createServerReadiness(base);
 
 function getToken() {
-  try { return JSON.parse(localStorage.getItem("user"))?.token ?? null; }
-  catch { return null; }
+  return getUser()?.token ?? null;
 }
 
 async function request(path, { method = "GET", body, timeoutMs } = {}) {
@@ -45,8 +45,8 @@ async function authenticate(path, body) {
   return user;
 }
 
-export function login(name, password) {
-  return authenticate("/api/auth/login", { name, password });
+export function login(name, password, remember = false) {
+  return authenticate("/api/auth/login", { name, password, ...(remember ? { remember: true } : {}) });
 }
 
 export function register(name, password, inviteCode = "") {

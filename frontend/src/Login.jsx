@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { ensureServerReady, login, register } from "./api";
-import { setUser } from "./auth";
+import { getRememberedLogin, isAuthed, rememberLogin, setUser } from "./auth";
 
 export default function LoginPage() {
-  const [name, setName] = useState("");
+  const [savedLogin] = useState(getRememberedLogin);
+  const [name, setName] = useState(savedLogin.name);
+  const [remember, setRemember] = useState(Boolean(savedLogin.remember));
   const [password, setPassword] = useState("");
   const [inviteCode, setInviteCode] = useState("");
   const [mode, setMode] = useState("login");
@@ -12,6 +14,10 @@ export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [connection, setConnection] = useState("connecting");
   const nav = useNavigate();
+
+  useEffect(() => {
+    if (isAuthed()) nav("/app", { replace: true });
+  }, [nav]);
 
   useEffect(() => {
     let active = true;
@@ -31,9 +37,10 @@ export default function LoginPage() {
       await ensureServerReady();
       setConnection("ready");
       const user = mode === "login"
-        ? await login(name, password)
+        ? await login(name, password, remember)
         : await register(name, password, inviteCode);
-      setUser(user);
+      setUser(user, mode === "login" && remember);
+      if (mode === "login") rememberLogin(name, remember);
       nav("/app");
     } catch (requestError) {
       if (!requestError.status) setConnection("unavailable");
@@ -67,9 +74,10 @@ export default function LoginPage() {
         </div>
 
         <form onSubmit={submit} className="login-form">
-          <label>TRAVELER NAME<input value={name} onChange={(event) => setName(event.target.value)} autoComplete="username" placeholder="Username" required /></label>
-          <label>PASSWORD<input value={password} onChange={(event) => setPassword(event.target.value)} autoComplete={mode === "login" ? "current-password" : "new-password"} placeholder="Enter your password" type="password" required />{mode === "register" && <small>At least 6 characters with a letter and a number.</small>}</label>
+          <label>TRAVELER NAME<input name="username" value={name} onChange={(event) => setName(event.target.value)} autoComplete="username" placeholder="Username" required /></label>
+          <label>PASSWORD<input name="password" value={password} onChange={(event) => setPassword(event.target.value)} autoComplete={mode === "login" ? "current-password" : "new-password"} placeholder="Enter your password" type="password" required />{mode === "register" && <small>At least 6 characters with a letter and a number.</small>}</label>
           {mode === "register" && <label>INVITATION CODE<input value={inviteCode} onChange={(event) => setInviteCode(event.target.value.toUpperCase())} placeholder="8-character code" maxLength={32} required /></label>}
+          {mode === "login" && <label className="login-remember"><input type="checkbox" checked={remember} onChange={(event) => setRemember(event.target.checked)} /><span>Remember me for 30 days</span></label>}
           <small role="status" aria-live="polite">{connection === "connecting" ? "Connecting to the server… If it is asleep, this can take up to two minutes." : connection === "ready" ? "Server connected." : "Submit the form to try connecting again."}</small>
           {error && <div className="login-error" role="alert">{error}</div>}
           <button className="login-submit" disabled={loading}>{loading ? connection === "connecting" ? "Connecting to server…" : "Opening your trip…" : mode === "login" ? "Enter Trip Tools  →" : "Join shared trip  →"}</button>

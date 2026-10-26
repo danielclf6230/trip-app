@@ -1,4 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import AppVersion from "./AppVersion";
 import LoginPage from "./Login";
 import ProtectedRoute from "./ProtectedRoute";
 import UserPage from "./UserPage";
@@ -32,6 +33,7 @@ export default function App() {
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </BrowserRouter>
+      <AppVersion />
     </div>
   );
 }

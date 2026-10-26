@@ -271,3 +271,19 @@
 }
 .wheel-disc { width: 100%; height: 100%; overflow: hidden; border-radius: 50%; }
 .wheel { overflow: hidden; }
+.login-form > .login-remember { display: flex; align-items: center; gap: 9px; margin: 0; color: var(--ink); font: 500 13px 'DM Sans', sans-serif; letter-spacing: normal; text-transform: none; cursor: pointer; }
+.login-form > .login-remember input { flex: 0 0 18px; width: 18px; height: 18px; min-height: 0; margin: 0; padding: 0; accent-color: var(--red); }
+.app-version { padding: 8px 16px 12px; text-align: center; color: #65716b; font: 500 11px 'DM Sans', sans-serif; letter-spacing: .04em; }
+/* Reserve footer space so the version does not add a second screen on sign-in. */
+.login-page { min-height: calc(100vh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 34px); min-height: calc(100dvh - env(safe-area-inset-top,0px) - env(safe-area-inset-bottom,0px) - 34px); }
+.app-version { min-height: 34px; line-height: 14px; }
+@media (max-width: 900px) and (max-height: 620px) {
+  .login-panel { padding-block: 12px; }
+  .login-panel h1 { font-size: 26px; }
+  .login-intro { margin-bottom: 10px; font-size: 12px; }
+  .auth-tabs { margin-bottom: 10px; }
+  .login-form { gap: 8px; }
+  .login-form input { min-height: 44px; padding-block: 10px; }
+  .login-secure { margin-top: 10px; }
+}
+@media (min-width: 901px) { .login-scene { min-height: inherit; } }
