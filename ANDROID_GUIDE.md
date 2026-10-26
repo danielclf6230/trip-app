@@ -5,7 +5,17 @@
 Copy and paste this into the chat after finishing your code changes:
 
 ```text
-Release my updates for Android, Mac, Windows, and iPhone together from this Mac. Use one shared version, reusing it if already prepared for this release. Use my existing signing keys. Build and verify the Android APK and Apple Silicon Mac installer, upload their update files to S3, and prepare their update manifests. Build and install the iPhone app on my connected phone using my existing Personal Team; keep its bundle identifier and local data. Fix errors and tell me what to push, where the installers are, and which updates are actually live. If a phone, credential, or service is unavailable, finish the independent work and report what is blocked. Run the configured Windows GitHub Actions workflow for that same version, wait for its result, and verify its live update entry. Include the Windows installer link in the report. Do not replace signing keys or claim success without checking.
+Release all my finished changes for Android, Mac, Windows, and iPhone. Do the complete release from this Mac, not just give instructions.
+
+- Use one shared version. Continue an already prepared, unfinished release without bumping again. If these are new changes after a published release, increase the patch version once. Keep the JSON, TOML, Cargo.lock, and iPhone versions consistent.
+- Run the checks and fix build errors. Keep the app identifiers and original Android, Mac, and Windows signing keys. Never replace keys or print passwords/private keys.
+- Build and verify the release-signed Android APK and Apple Silicon Mac app/DMG. Run the configured Windows GitHub Actions workflow for the same version and wait for its result. Do not stop after starting the workflow.
+- Upload verified release files to the existing private S3 bucket. Publish the correct update manifests, preserving same-version Windows and Mac entries. Never advertise an older installer as a newer version. Coordinate publishing so a Mac update does not remove the working Windows update entry.
+- Commit and push the necessary app, version, and manifest changes using the existing GitHub access. Wait for Render and the web frontend deployments. Verify the live update endpoints and actual downloads for Windows, Mac, and Android before calling them live. Source pushes alone are not releases.
+- Do not install Windows, Mac, or Android for me. Make their Update available button work in older updater-enabled apps after reopening. Build and install the iPhone update on my connected phone with my existing Personal Team, keeping its local data. iPhone has no in-app updater in this setup.
+- Finish all independent work if a phone, key, account, or service is unavailable. Ask only for the specific missing information or device action needed. Never claim a build, upload, deployment, or installation succeeded without checking it.
+
+Report each platform separately: version, build status, installer location/download link, update live or blocked, and device installation status. Include the Windows installer link. Tell me if anything still needs pushing or setup; otherwise say no further push is needed. Keep the report short.
 ```
 
 ## Ask Codex to do it
