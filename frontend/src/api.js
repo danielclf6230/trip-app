@@ -1,9 +1,8 @@
 import { getUser } from "./auth.js";
 import { createServerReadiness } from "./serverReadiness.js";
+import { resolveApiBase } from "./apiBase.js";
 
-const productionBase = "https://tools-backend-v3um.onrender.com";
-const env = import.meta.env || {};
-const base = (env.VITE_API_BASE_URL || (env.PROD ? productionBase : "http://localhost:3000")).replace(/\/$/, "");
+const base = resolveApiBase(import.meta.env);
 export const ensureServerReady = createServerReadiness(base);
 
 function getToken() {
