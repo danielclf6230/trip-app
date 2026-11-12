@@ -34,7 +34,21 @@ npm ci
 npm run tauri -- ios run --release --open
 ```
 
+Keep that Terminal command running while you build or run from Xcode. Opening the `.xcodeproj` alone is not enough: Xcode's **Build Rust Code** step connects to the running Tauri CLI.
+
 In Xcode, select your iPhone and click **▶ Run**. Keep the same team and bundle identifier; do not delete the old app first. Reuse the version already prepared for this release, or update both `tauri.conf.json` and `Cargo.toml` for a new release.
+
+If the build fails with **failed to connect to the Tauri CLI**, **Connection refused (os error 61)**, or **PhaseScriptExecution failed**, check the first error in the build log. For the Tauri connection error, rerun the command above, leave it running, and try **▶ Run** again.
+
+If the linker reports missing `_log_stdout`, `_on_webview_created`, or `_run_plugin_command` symbols and the Swift build output warns that `llvm-objcopy` is missing, install the required tool and rebuild the affected iOS libraries:
+
+```bash
+rustup component add llvm-tools
+cd /Users/daniel/Documents/trip-app/frontend/src-tauri
+cargo clean --target aarch64-apple-ios -p tauri -p tauri-plugin-log
+```
+
+Then repeat the update commands above. A Rust toolchain update may require installing `llvm-tools` again.
 
 ## When it expires
 
